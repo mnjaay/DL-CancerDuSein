@@ -1,0 +1,90 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cancer_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+  
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      - auth-service
+      - inference-service
+      - data-service
+    ports:
+      - "8004:8000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - INFERENCE_SERVICE_URL=http://inference-service:8001
+      - DATA_SERVICE_URL=http://data-service:8002
+  
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    restart: always
+    env_file:
+      - ./auth-service/.env
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/auth_db
+  
+  data-service:
+    build:
+      context: ./data-service
+    container_name: data-service
+    restart: always
+    env_file:
+      - ./data-service/.env
+    depends_on:
+      - postgres
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/cancer_db
+  
+  inference-service:
+    build:
+      context: ./inference-service
+    container_name: inference-service
+    restart: always
+    ports:
+      - "8001:8001"
+    depends_on:
+      - data-service
+  
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - api-gateway
+    ports:
+      - "8501:8501"
+    environment:
+      - API_GATEWAY_URL=http://api-gateway:8000
+
+  
+  
+volumes:
+  postgres_data:

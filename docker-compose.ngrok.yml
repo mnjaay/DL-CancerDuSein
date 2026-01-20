@@ -1,0 +1,106 @@
+version: '3.8'
+
+# Pour utiliser cette version avec ngrok, lancez:
+# docker-compose -f docker-compose.ngrok.yml up
+
+# Assurez-vous d'abord que l'authentification ngrok est configurée:
+# ngrok config add-authtoken YOUR_TOKEN
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+
+  data-service:
+    build: ./data-service
+    ports:
+      - "8002:8002"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/cancer_db
+    networks:
+      - default
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8003:8003"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/auth_db
+      - SECRET_KEY=your-secret-key-change-this
+    networks:
+      - default
+
+  inference-service:
+    build: ./inference-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DATA_SERVICE_URL=http://data-service:8002
+    networks:
+      - default
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8004:8000"
+    environment:
+      - INFERENCE_SERVICE_URL=http://inference-service:8001
+      - AUTH_SERVICE_URL=http://auth-service:8003
+      - DATA_SERVICE_URL=http://data-service:8002
+    networks:
+      - default
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_GATEWAY_URL=http://api-gateway:8000
+    networks:
+      - default
+
+  # Service ngrok pour exposer le frontend
+  ngrok-frontend:
+    image: ngrok/ngrok:latest
+    command: http frontend:8501
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    depends_on:
+      - frontend
+    networks:
+      - default
+
+  # Service ngrok pour exposer l'API Gateway
+  ngrok-api:
+    image: ngrok/ngrok:latest
+    command: http api-gateway:8000
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4041:4040"
+    depends_on:
+      - api-gateway
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: projetdeeplearningcancerdusein_default
