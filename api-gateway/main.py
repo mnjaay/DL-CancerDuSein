@@ -22,6 +22,9 @@ AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8000")
 INFERENCE_SERVICE_URL = os.getenv("INFERENCE_SERVICE_URL", "http://inference-service:8001")
 DATA_SERVICE_URL = os.getenv("DATA_SERVICE_URL", "http://data-service:8002")
 
+# Config httpx
+HTTPX_TIMEOUT = 60.0
+
 # Health checks
 @app.get("/health")
 async def health():
@@ -30,7 +33,7 @@ async def health():
 # ===== AUTH SERVICE ROUTES =====
 @app.post("/api/auth/register")
 async def register(request: dict):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.post(
             f"{AUTH_SERVICE_URL}/auth/register",
             json=request
@@ -39,7 +42,7 @@ async def register(request: dict):
 
 @app.post("/api/auth/login")
 async def login(request: dict):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.post(
             f"{AUTH_SERVICE_URL}/auth/login",
             json=request
@@ -48,7 +51,7 @@ async def login(request: dict):
 
 @app.get("/api/auth/verify")
 async def verify_token(token: str):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.get(
             f"{AUTH_SERVICE_URL}/auth/verify",
             params={"token": token}
@@ -61,7 +64,7 @@ async def predict(file: UploadFile = File(...)):
     # Lire le contenu du fichier
     file_content = await file.read()
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.post(
             f"{INFERENCE_SERVICE_URL}/inference/predict",
             files={"file": (file.filename, file_content, file.content_type)}
@@ -73,7 +76,7 @@ async def predict(file: UploadFile = File(...)):
 # CREATE
 @app.post("/api/predictions")
 async def create_prediction(request: dict):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.post(
             f"{DATA_SERVICE_URL}/predictions/",
             json=request
@@ -83,7 +86,7 @@ async def create_prediction(request: dict):
 # READ ALL
 @app.get("/api/predictions")
 async def get_predictions(skip: int = 0, limit: int = 100):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.get(
             f"{DATA_SERVICE_URL}/predictions/",
             params={"skip": skip, "limit": limit}
@@ -93,7 +96,7 @@ async def get_predictions(skip: int = 0, limit: int = 100):
 # READ ONE
 @app.get("/api/predictions/{prediction_id}")
 async def get_prediction(prediction_id: int):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.get(
             f"{DATA_SERVICE_URL}/predictions/{prediction_id}"
         )
@@ -102,7 +105,7 @@ async def get_prediction(prediction_id: int):
 # UPDATE
 @app.put("/api/predictions/{prediction_id}")
 async def update_prediction(prediction_id: int, request: dict):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.put(
             f"{DATA_SERVICE_URL}/predictions/{prediction_id}",
             json=request
@@ -112,7 +115,7 @@ async def update_prediction(prediction_id: int, request: dict):
 # DELETE
 @app.delete("/api/predictions/{prediction_id}")
 async def delete_prediction(prediction_id: int):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.delete(
             f"{DATA_SERVICE_URL}/predictions/{prediction_id}"
         )
@@ -121,7 +124,7 @@ async def delete_prediction(prediction_id: int):
 # STATS
 @app.get("/api/predictions/stats/summary")
 async def get_stats():
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
         response = await client.get(
             f"{DATA_SERVICE_URL}/predictions/stats/summary"
         )
@@ -138,28 +141,50 @@ async def predict_and_save(file: UploadFile = File(...)):
     # Lire le contenu du fichier en bytes
     file_content = await file.read()
     
-    # Étape 1: Prédiction
-    async with httpx.AsyncClient() as client:
-        predict_response = await client.post(
-            f"{INFERENCE_SERVICE_URL}/inference/predict",
-            files={"file": (file.filename, file_content, file.content_type)}
-        )
-        prediction_data = predict_response.json()
-    
-    # Étape 2: Sauvegarder dans data-service
-    save_data = {
-        "prediction": prediction_data.get("prediction"),
-        "confidence": prediction_data.get("confidence"),
-        "filename": file.filename
-    }
-    
-    async with httpx.AsyncClient() as client:
-        save_response = await client.post(
-            f"{DATA_SERVICE_URL}/predictions/",
-            json=save_data
-        )
-    
-    return {
-        "prediction": prediction_data,
-        "saved_record": save_response.json()
-    }
+    try:
+        # Étape 1: Prédiction
+        async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
+            predict_response = await client.post(
+                f"{INFERENCE_SERVICE_URL}/inference/predict",
+                files={"file": (file.filename, file_content, file.content_type)}
+            )
+            
+            if predict_response.status_code != 200:
+                return {
+                    "error": "Erreur lors de la prédiction",
+                    "status_code": predict_response.status_code,
+                    "detail": predict_response.text
+                }
+                
+            prediction_data = predict_response.json()
+        
+        # Étape 2: Sauvegarder dans data-service
+        save_data = {
+            "prediction": prediction_data.get("prediction"),
+            "confidence": prediction_data.get("confidence"),
+            "filename": file.filename
+        }
+        
+        async with httpx.AsyncClient(timeout=HTTPX_TIMEOUT) as client:
+            save_response = await client.post(
+                f"{DATA_SERVICE_URL}/predictions/",
+                json=save_data
+            )
+            
+            if save_response.status_code not in [200, 201]:
+                return {
+                    "error": "Erreur lors de la sauvegarde",
+                    "status_code": save_response.status_code,
+                    "detail": save_response.text,
+                    "prediction": prediction_data
+                }
+        
+        return {
+            "prediction": prediction_data,
+            "saved_record": save_response.json()
+        }
+        
+    except httpx.ReadTimeout:
+        return {"error": "Délai d'attente dépassé (timeout 60s) lors de l'appel aux microservices"}
+    except Exception as e:
+        return {"error": f"Erreur inattendue dans la passerelle: {str(e)}"}

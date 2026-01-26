@@ -1,0 +1,120 @@
+name: Model Update & Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'inference-service/models/*.h5'
+      - 'inference-service/models/*.keras'
+      - 'ml/train.py'
+      - 'ml/config.yaml'
+
+jobs:
+  check-model:
+    name: Check Model File
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - name: Checkout LFS objects
+        run: git lfs pull
+      
+      - name: Check model file exists
+        run: |
+          if [ -f "inference-service/models/model.h5" ]; then
+            echo "✅ Model file found"
+            ls -lh inference-service/models/model.h5
+            echo "Model size: $(du -h inference-service/models/model.h5 | cut -f1)"
+          else
+            echo "❌ Model file not found"
+            exit 1
+          fi
+      
+      - name: Validate model file
+        run: |
+          python -c "
+          import tensorflow as tf
+          try:
+              model = tf.keras.models.load_model('inference-service/models/model.h5')
+              print('✅ Model loaded successfully')
+              model.summary()
+          except Exception as e:
+              print(f'❌ Error loading model: {e}')
+              exit(1)
+          "
+  
+  build-inference-service:
+    name: Build Inference Service
+    needs: check-model
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      
+      - name: Checkout LFS objects
+        run: git lfs pull
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/cancer-detection-inference
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./inference-service
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/cancer-detection-inference:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/cancer-detection-inference:buildcache,mode=max
+      
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+  
+  notify:
+    name: Send Notification
+    needs: build-inference-service
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.build-inference-service.result }}" == "success" ]; then
+            echo "✅ New model deployed successfully!"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
+      
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ needs.build-inference-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY

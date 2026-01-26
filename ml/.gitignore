@@ -1,0 +1,44 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment
+venv/
+env/
+.venv/
+
+# Ignore data (too large, use DVC or external storage)
+data/train/
+data/val/
+data/test/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Ignore MLflow
+mlruns/
+
+# Ignore checkpoints (except best model)
+checkpoints/*
+!checkpoints/.gitkeep
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore TensorBoard
+events.out.tfevents.*
+
+# Ignore evaluation outputs
+evaluation/
+
+# Ignore Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Ignore macOS
+.DS_Store
+
+# Keep directory structure
+!.gitkeep

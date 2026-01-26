@@ -1,0 +1,25 @@
+# Configuration d'entraînement du modèle
+
+data:
+  train_dir: "data/train"
+  val_dir: "data/val"
+  test_dir: "data/test"
+
+model:
+  img_height: 128
+  img_width: 128
+  channels: 3
+  checkpoint_dir: "checkpoints"
+  output_path: "../inference-service/models/model.h5"
+
+training:
+  batch_size: 32
+  epochs: 50
+  early_stopping_patience: 10
+  learning_rate: 0.001
+
+augmentation:
+  horizontal_flip: true
+  rotation_range: 0.2
+  zoom_range: 0.2
+  contrast_range: 0.2
