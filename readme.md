@@ -131,20 +131,34 @@ Le workflow `.github/workflows/model-update.yml` automatise le déploiement :
 ## 📁 Structure du Projet
 
 ```text
-.
+DL-CancerDuSein/
 ├── 📂 api-gateway/         # Passerelle unique (FastAPI)
+│   ├── main.py             # Routage & Workflows
+│   └── dockerfile
 ├── 📂 auth-service/        # Gestion utilisateurs (FastAPI)
+│   ├── app/                # Logique Auth & JWT (Argon2)
+│   └── dockerfile
 ├── 📂 data-service/        # CRUD & Statistiques (FastAPI)
+│   ├── app/                # Modèles & Routes SQL (PostgreSQL)
+│   └── dockerfile
 ├── 📂 inference-service/   # Moteur IA (TensorFlow)
-├── 📂 frontend/            # Streamlit v2 (Modulaire)
+│   ├── app/                # Chargement modèle & Prédiction
+│   ├── models/             # Dossier du modèle .h5 (Git LFS)
+│   └── dockerfile
+├── 📂 frontend/            # Interface utilisateur (Streamlit v2)
 │   ├── 📂 components/      # UI isolée (Auth, Stats, Upload, About)
-│   └── 📂 config/          # Thèmes et Styles
-├── 📂 ml/                  # Research & Training scripts
-│   ├── train.py            # Entraînement CNN
-│   ├── preprocessing.py    # Nettoyage Data
-│   └── evaluate.py         # Métriques & Plots
-├── run_full_pipeline.sh    # Script maître d'automatisation
-└── docker-compose.yml      # Orchestration cloud-ready
+│   ├── 📂 config/          # Thèmes & CSS personalisés
+│   ├── 📂 utils/           # Client API & Logique métier
+│   ├── streamlit_app.py    # Point d'entrée application
+│   └── dockerfile
+├── 📂 ml/                  # Research & Training Pipeline
+│   ├── train.py            # Script d'entraînement CNN
+│   ├── preprocessing.py    # Nettoyage & Augmentation Data
+│   ├── evaluate.py         # Métriques, Confusion Matrix & Plots
+│   └── config.yaml         # Configuration des hyperparamètres
+├── run_full_pipeline.sh    # Script maître d'automatisation (Master)
+├── setup_ml.sh             # Installation environnement local ML
+└── docker-compose.yml      # Orchestration Microservices Cloud-ready
 ```
 
 ---
