@@ -8,67 +8,67 @@ Ce document décrit l'architecture complète du système de détection du cancer
 
 ## Architecture Globale
 
+Le système est découpé en services orchestrés par Docker Compose. Voici les ports par défaut :
+
+| Service | Port (Hôte) | Port (Docker) | Rôle |
+|:--- |:--- |:--- |:--- |
+| **Frontend** | `8501` | `8501` | Interface Utilisateur |
+| **API Gateway**| `8004` | `8000` | Entrée unique (Workflow routing) |
+| **Auth Service**| `8000` | `8000` | Authentification JWT |
+| **Inference** | `8001` | `8001` | Inférence Deep Learning |
+| **Data Service**| `8002` | `8002` | CRUD & Statistiques SQL |
+| **PostgreSQL** | `5432` | `5432` | Base de données |
+
+## Architecture Globale
+
 ```mermaid
 graph TB
-    subgraph "External Layer"
-        U[👤 Utilisateur/Client]
-        N[🌐 ngrok<br/>Tunnel Public]
+    subgraph "Clients"
+        U[👤 Utilisateur]
     end
-    
-    subgraph "Presentation Layer"
-        F[🎨 Frontend Service v2<br/>Streamlit Modulaire<br/>Port: 8501]
+
+    subgraph "External Gateway"
+        G[🚪 Gateway<br/>8004:8000]
     end
-    
-    subgraph "Gateway Layer"
-        G[🚪 API Gateway<br/>FastAPI<br/>Port: 8004]
+
+    subgraph "Internal Infrastructure (Docker Network)"
+        subgraph "UI"
+            F[🎨 Frontend<br/>8501]
+        end
+
+        subgraph "Microservices"
+            A[🔐 Auth<br/>8000]
+            I[🧠 Inference<br/>8001]
+            D[💾 Data<br/>8002]
+        end
+
+        subgraph "Storage"
+            DB[(🗄️ PostgreSQL<br/>5432)]
+            V[(📁 Volumes)]
+        end
     end
-    
-    subgraph "Business Logic Layer"
-        A[🔐 Auth Service<br/>FastAPI<br/>Port: 8000]
-        I[🧠 Inference Service<br/>TensorFlow + FastAPI<br/>Port: 8001]
-        D[💾 Data Service<br/>FastAPI + SQLAlchemy<br/>Port: 8002]
+
+    subgraph "ML Assets"
+        M[🤖 CNN Model]
     end
+
+    U -->|Access| F
+    F -->|REST Calls| G
+    G -->|Verify Auth| A
+    G -->|Run Inference| I
+    G -->|Get Stats| D
     
-    subgraph "Data Layer"
-        DB[(🗄️ PostgreSQL<br/>Port: 5432)]
-    end
-    
-    subgraph "ML Research & Pipeline"
-        P[🧹 Preprocessing]
-        T[🏋️ Training]
-        E[📊 Evaluation]
-    end
-    
-    subgraph "Model Storage"
-        M[🤖 CNN Model<br/>Git LFS tracked<br/>model.h5]
-    end
-    
-    U -->|HTTPS| N
-    N -->|HTTP| F
-    F -->|API Calls| G
-    
-    G -->|Auth| A
-    G -->|Predict| I
-    G -->|CRUD| D
-    
-    A <-->|SQL| DB
-    D <-->|SQL| DB
-    
-    T -->|Génère| M
-    M -->|Chargé par| I
-    P -->|Prépare Data pour| T
-    E -->|Valide| T
-    
-    style U fill:#e1f5ff
-    style N fill:#fff9e1
-    style F fill:#e1f5ff
-    style G fill:#fff4e1
-    style A fill:#ffe1f5
-    style I fill:#e1ffe1
-    style D fill:#f5e1ff
-    style DB fill:#ffe1e1
-    style M fill:#e1ffe1
-    style P fill:#f1f1f1
+    A -->|User Data| DB
+    D -->|Predictions| DB
+    DB --- V
+    I -->|Load| M
+
+    style G fill:#fff4e1,stroke:#d4a017
+    style F fill:#e1f5ff,stroke:#0066cc
+    style A fill:#ffe1f5,stroke:#c2185b
+    style I fill:#e1ffe1,stroke:#388e3c
+    style D fill:#f5e1ff,stroke:#7b1fa2
+    style DB fill:#ffe1e1,stroke:#d32f2f
 ```
 
 ---
