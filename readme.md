@@ -45,16 +45,16 @@ Ce projet est un système complet de grade industriel pour l'analyse d'images ma
 
 ## 🏗️ Architecture du Système
 
-Le système est découpé en services spécialisés communiquant en asynchrone :
+Le système est découpé en services spécialisés communiquant via une API Gateway :
 
-| Service | Technologies | Rôle |
-|:--- |:--- |:--- |
-| **API Gateway** | FastAPI, HTTPX | Point d'entrée unique, routage et aggrégation de workflow. |
-| **Auth Service** | FastAPI, JWT, Argon2 | Gestion sécurisée des utilisateurs et authentification. |
-| **Inference Service** | FastAPI, TensorFlow | Moteur de prédiction chargeant le modèle CNN. |
-| **Data Service** | FastAPI, SQLAlchemy | Persistence des résultats et statistiques dans PostgreSQL. |
-| **Frontend v2** | Streamlit, Plotly | Interface utilisateur modulaire et interactive. |
-| **Database** | PostgreSQL 15 | Stockage relationnel des données cliniques. |
+| Service | Port Externe | Port Interne | Rôle |
+|:--- |:--- |:--- |:--- |
+| **Frontend** | `8501` | `8501` | Interface Utilisateur (Streamlit) |
+| **API Gateway** | `8004` | `8000` | Port d'entrée unique (FastAPI) |
+| **Auth Service** | `8000` | `8000` | Authentification JWT |
+| **Inference Service**| `8001` | `8001` | Prédictions ML (TensorFlow) |
+| **Data Service** | `8002` | `8002` | Gestion Base de Données |
+| **PostgreSQL** | `5432` | `5432` | Persistence des données |
 
 ### Schéma des Communications
 
