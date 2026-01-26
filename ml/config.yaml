@@ -11,6 +11,10 @@ model:
   channels: 3
   checkpoint_dir: "checkpoints"
   output_path: "../inference-service/models/model.h5"
+  use_transfer_learning: true
+  base_model: "VGG16" # Options: VGG16, ResNet50, MobileNetV2
+  fine_tune_epochs: 10
+
 
 training:
   batch_size: 32

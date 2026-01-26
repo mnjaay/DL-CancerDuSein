@@ -18,53 +18,71 @@ def load_config(config_path="config.yaml"):
         return yaml.safe_load(f)
 
 
-def build_model(input_shape=(128, 128, 3), num_classes=1):
+def build_model(config, input_shape=(128, 128, 3), num_classes=1):
     """
-    Construire le modèle CNN
-    
-    Architecture:
-    - 3 blocs Conv2D + MaxPooling
-    - Flatten
-    - 2 couches Dense avec Dropout
-    - Sortie sigmoid pour classification binaire
+    Construire le modèle (CNN Custom ou Transfer Learning)
     """
+    use_tl = config['model'].get('use_transfer_learning', False)
     
-    model = keras.Sequential([
-        # Bloc 1
-        layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=input_shape),
-        layers.BatchNormalization(),
-        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.MaxPooling2D((2, 2)),
-        layers.Dropout(0.25),
+    if not use_tl:
+        print("🏗️  Construction du modèle CNN Custom...")
+        model = keras.Sequential([
+            # Bloc 1
+            layers.Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=input_shape),
+            layers.BatchNormalization(),
+            layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Bloc 2
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Bloc 3
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Fully Connected
+            layers.Flatten(),
+            layers.Dense(256, activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
+            layers.Dense(128, activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
+            layers.Dense(num_classes, activation='sigmoid')
+        ])
+    else:
+        base_name = config['model'].get('base_model', 'VGG16')
+        print(f"🏗️  Construction du modèle via Transfer Learning ({base_name})...")
         
-        # Bloc 2
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.MaxPooling2D((2, 2)),
-        layers.Dropout(0.25),
+        if base_name == "VGG16":
+            base_model = tf.keras.applications.VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
+        elif base_name == "ResNet50":
+            base_model = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=input_shape)
+        else:
+            base_model = tf.keras.applications.MobileNetV2(weights='imagenet', include_top=False, input_shape=input_shape)
+            
+        base_model.trainable = False  # Geler les poids du modèle pré-entraîné
         
-        # Bloc 3
-        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.MaxPooling2D((2, 2)),
-        layers.Dropout(0.25),
+        model = keras.Sequential([
+            base_model,
+            layers.GlobalAveragePooling2D(),
+            layers.Dense(256, activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
+            layers.Dense(num_classes, activation='sigmoid')
+        ])
         
-        # Fully Connected
-        layers.Flatten(),
-        layers.Dense(256, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dropout(0.5),
-        layers.Dense(128, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dropout(0.5),
-        layers.Dense(num_classes, activation='sigmoid')
-    ])
-    
     return model
 
 
@@ -116,58 +134,27 @@ def load_datasets(config):
 
 
 def train_model(config, model, train_ds, val_ds):
-    """Entraîner le modèle"""
+    """Entraîner le modèle (avec phase optionnelle de Fine-Tuning)"""
     
-    # Compile model
+    use_tl = config['model'].get('use_transfer_learning', False)
+    
+    # 1. Compilation initiale
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=config['training']['learning_rate']),
         loss='binary_crossentropy',
-        metrics=[
-            'accuracy',
-            keras.metrics.AUC(name='auc'),
-            keras.metrics.Precision(name='precision'),
-            keras.metrics.Recall(name='recall')
-        ]
+        metrics=['accuracy', keras.metrics.AUC(name='auc')]
     )
     
-    # Create checkpoint directory
     checkpoint_dir = Path(config['model']['checkpoint_dir'])
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     
-    # Callbacks
     callbacks = [
-        keras.callbacks.ModelCheckpoint(
-            filepath=str(checkpoint_dir / 'model_epoch_{epoch:02d}_acc_{val_accuracy:.4f}.h5'),
-            save_best_only=True,
-            monitor='val_accuracy',
-            mode='max',
-            verbose=1
-        ),
-        keras.callbacks.EarlyStopping(
-            monitor='val_loss',
-            patience=config['training']['early_stopping_patience'],
-            restore_best_weights=True,
-            verbose=1
-        ),
-        keras.callbacks.ReduceLROnPlateau(
-            monitor='val_loss',
-            factor=0.5,
-            patience=5,
-            min_lr=1e-7,
-            verbose=1
-        ),
-        keras.callbacks.TensorBoard(
-            log_dir=f"logs/{datetime.now().strftime('%Y%m%d-%H%M%S')}",
-            histogram_freq=1
-        )
+        keras.callbacks.EarlyStopping(monitor='val_loss', patience=config['training']['early_stopping_patience'], restore_best_weights=True),
+        keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7)
     ]
     
-    # Train
-    print("\n🚀 Starting training...")
-    print(f"Epochs: {config['training']['epochs']}")
-    print(f"Batch size: {config['training']['batch_size']}")
-    print(f"Learning rate: {config['training']['learning_rate']}\n")
-    
+    # Phase 1: Entraînement des couches supérieures (Top layers)
+    print("\n🚀 Phase 1: Entraînement des couches supérieures...")
     history = model.fit(
         train_ds,
         validation_data=val_ds,
@@ -176,6 +163,31 @@ def train_model(config, model, train_ds, val_ds):
         verbose=1
     )
     
+    # Phase 2: Fine-Tuning (uniquement pour Transfer Learning)
+    if use_tl and config['model'].get('fine_tune_epochs', 0) > 0:
+        print("\n🚀 Phase 2: Fine-tuning (déblocage des couches du base model)...")
+        
+        # On débloque toutes les couches (ou une partie)
+        for layer in model.layers:
+            if isinstance(layer, keras.Model): # C'est le base_model
+                layer.trainable = True
+        
+        # On recompile avec un learning rate plus faible
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=config['training']['learning_rate'] / 10),
+            loss='binary_crossentropy',
+            metrics=['accuracy', keras.metrics.AUC(name='auc')]
+        )
+        
+        history_fine = model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=config['model'].get('fine_tune_epochs', 10),
+            callbacks=callbacks,
+            verbose=1
+        )
+        return history # On retourne l'historique initial (ou merge si besoin, ici on simplifie)
+        
     return history
 
 
@@ -250,7 +262,7 @@ def main():
         config['model']['img_width'],
         config['model']['channels']
     )
-    model = build_model(input_shape=input_shape)
+    model = build_model(config, input_shape=input_shape)
     
     # Print model summary
     print("\n📋 Model Summary:")
