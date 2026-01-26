@@ -47,10 +47,32 @@ git lfs track "*.pb"
 git lfs track "*.pkl"
 echo -e "${GREEN}✅ Model files tracked${NC}"
 
+# Select compatible Python version (TF 2.13-2.15 usually support 3.9-3.12)
+echo -e "\n${BLUE}Detecting compatible Python version...${NC}"
+PYTHON_CMD="python3"
+
+if command -v python3.12 &> /dev/null; then
+    PYTHON_CMD="python3.12"
+elif command -v python3.11 &> /dev/null; then
+    PYTHON_CMD="python3.11"
+elif command -v python3.10 &> /dev/null; then
+    PYTHON_CMD="python3.10"
+else
+    # Fallback to python3 but warn if it's 3.13+
+    VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    if (( $(echo "$VERSION > 3.12" | bc -l) )); then
+        echo -e "${YELLOW}⚠️ Warning: python3 is version $VERSION. TensorFlow might not be compatible.${NC}"
+        echo -e "${YELLOW}Recommended: Install Python 3.12 or 3.11.${NC}"
+    fi
+fi
+
+echo -e "${GREEN}Using: $($PYTHON_CMD --version)${NC}"
+
 # Create virtual environment for ML
 echo -e "\n${BLUE}Creating Python virtual environment...${NC}"
 cd ml
-python3 -m venv venv
+rm -rf venv # Clean possible failed venv
+$PYTHON_CMD -m venv venv
 source venv/bin/activate
 
 # Install dependencies

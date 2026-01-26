@@ -1,223 +1,93 @@
-# 🤖 ML Training Guide
+# 🤖 Guide d'Entraînement Deep Learning
 
-## Quick Start
+Ce dossier contient tous les outils nécessaires pour préparer les données, entraîner le modèle CNN et évaluer ses performances.
 
-### 1. Install Dependencies
+---
 
+## 🚀 Démarrage Rapide
+
+### 1. Préparer l'Environnement
+Nous recommandons d'utiliser le script de setup à la racine du projet :
 ```bash
+cd ..
+./setup_ml.sh
+source ml/venv/bin/activate
 cd ml
-pip install -r requirements.txt
 ```
 
-### 2. Prepare Your Data
-
-Organize your data in this structure:
-
-```
-ml/data/
-├── train/
-│   ├── Positive/
-│   │   ├── img1.jpg
-│   │   ├── img2.jpg
-│   │   └── ...
-│   └── Negative/
-│       ├── img1.jpg
-│       └── ...
-├── val/
-│   ├── Positive/
-│   └── Negative/
-└── test/
-    ├── Positive/
-    └── Negative/
+### 2. Organisation des Données
+Placez vos images brutes dans la structure suivante :
+```text
+ml/data/raw/
+├── Positive/  (Images avec cancer)
+└── Negative/  (Images saines)
 ```
 
-### 3. Train the Model
-
+### 3. Nettoyer et Préparer (Preprocessing)
+Lancer le script de nettoyage pour normaliser les images (128x128) et équilibrer les classes :
 ```bash
-python train.py
+python preprocessing.py clean --input data/raw --output data/cleaned
 ```
 
-Or with custom config:
-
+### 4. Entraîner le Modèle
 ```bash
-python train.py --config custom_config.yaml
+python train.py --config config.yaml
 ```
-
-### 4. Evaluate the Model
-
-```bash
-python evaluate.py ../inference-service/models/model.h5 data/test
-```
+*Le modèle sera automatiquement sauvegardé dans `../inference-service/models/model.h5`.*
 
 ---
 
-## Configuration
+## ⚙️ Configuration (`config.yaml`)
 
-Edit `config.yaml` to customize:
-
-- **Data paths**: Change `train_dir`, `val_dir`, `test_dir`
-- **Model params**: Image size, architecture
-- **Training params**: Batch size, epochs, learning rate
-- **Output path**: Where to save the model
-
----
-
-## Git LFS Setup
-
-### First Time Setup
-
-```bash
-# Install Git LFS
-brew install git-lfs  # macOS
-# or
-sudo apt-get install git-lfs  # Ubuntu
-
-# Initialize in your repo
-git lfs install
-
-# Track model files (already done via .gitattributes)
-git lfs track "*.h5"
-```
-
-### After Training
-
-```bash
-# Add the new model
-git add inference-service/models/model.h5
-
-# Commit with meaningful message
-git commit -m "Update model: accuracy 95.2%"
-
-# Push (triggers GitHub Actions)
-git push origin main
-```
+Vous pouvez personnaliser l'entraînement sans toucher au code :
+- **Data**: Chemins vers les dossiers `train`, `val`, `test`.
+- **Model**: Taille des images (par défaut 128x128), architecture.
+- **Training**: Batch size, nombre d'époques, taux d'apprentissage (learning rate).
+- **Callbacks**: Early stopping et réduction de LR sur plateau.
 
 ---
 
-## GitHub Actions Automation
+## 📊 Évaluation et Visualisation
 
-### Setup Secrets
-
-1. Go to your GitHub repo settings
-2. Navigate to **Secrets and variables** > **Actions**
-3. Add these secrets:
-   - `DOCKER_USERNAME`: Your Docker Hub username
-   - `DOCKER_PASSWORD`: Your Docker Hub password/token
-
-### What Happens on Push
-
-1. ✅ Model file is validated
-2. ✅ Docker image is built with new model
-3. ✅ Image is pushed to Docker Hub
-4. ✅ Notification sent
-
-### Monitor Deployments
-
-- Check **Actions** tab on GitHub
-- View build logs
-- See deployment summary
-
----
-
-## Model Training Tips
-
-### Data Preparation
-
-- **Balance classes**: Equal Positive/Negative samples
-- **Image quality**: Good resolution, not corrupted
-- **Data split**: 70% train, 15% val, 15% test
-
-### Hyperparameter Tuning
-
-```yaml
-# In config.yaml
-training:
-  batch_size: 32        # Try: 16, 32, 64
-  epochs: 50            # Adjust based on convergence
-  learning_rate: 0.001  # Try: 0.0001, 0.001, 0.01
-```
-
-### Monitoring Training
-
+### Rapports de Performance
+Après l'entraînement, générez un rapport complet :
 ```bash
-# Launch TensorBoard
+python evaluate.py ../inference-service/models/model.h5 data/cleaned/test
+```
+Ce script génère :
+- Une **Matrice de Confusion**.
+- Les courbes **ROC** et **Precision-Recall**.
+- Un fichier `metrics.json` pour le suivi.
+
+### TensorBoard
+Pour suivre l'entraînement en temps réel :
+```bash
 tensorboard --logdir logs/
-
-# Open browser
-# http://localhost:6006
 ```
+Puis ouvrez [http://localhost:6006](http://localhost:6006).
 
 ---
 
-## Troubleshooting
+## 🐘 Gestion des Modèles Lourds (Git LFS)
 
-### Out of Memory
-
-```yaml
-# Reduce batch size in config.yaml
-training:
-  batch_size: 16  # Instead of 32
-```
-
-### Model Not Converging
-
-- Reduce learning rate
-- Increase epochs
-- Check data quality
-- Try data augmentation
-
-### Git LFS Issues
-
-```bash
-# Pull LFS files
-git lfs pull
-
-# Check LFS status
-git lfs ls-files
-
-# Re-track if needed
-git lfs track "*.h5"
-git add .gitattributes
-git commit -m "Update Git LFS tracking"
-```
+Les fichiers `.h5` sont gérés par **Git LFS** pour ne pas alourdir le dépôt.
+1. Assurez-vous que LFS est installé (`brew install git-lfs`).
+2. Lors d'un `push`, le modèle est envoyé sur les serveurs de stockage d'objets de GitHub.
+3. Le workflow GitHub Actions détecte le changement et lance le déploiement.
 
 ---
 
-## Advanced: Transfer Learning
+## 💡 Conseils pour l'Entraînement
 
-For better results, use transfer learning:
-
-```python
-# In train.py, replace build_model() with:
-from tensorflow.keras.applications import ResNet50
-
-def build_transfer_model(input_shape=(128, 128, 3)):
-    base_model = ResNet50(
-        weights='imagenet',
-        include_top=False,
-        input_shape=input_shape
-    )
-    base_model.trainable = False  # Freeze base
-    
-    model = keras.Sequential([
-        base_model,
-        layers.GlobalAveragePooling2D(),
-        layers.Dense(256, activation='relu'),
-        layers.Dropout(0.5),
-        layers.Dense(1, activation='sigmoid')
-    ])
-    
-    return model
-```
+1. **Équilibre des classes**: Le script `preprocessing.py` gère l'undersampling/oversampling. Utilisez-le pour éviter que le modèle ne favorise une classe.
+2. **Transfer Learning**: Si vos résultats stagnent, envisagez de modifier `train.py` pour utiliser une base **VGG16** ou **ResNet50** pré-entraînée sur ImageNet.
+3. **Dropout**: Une valeur de 0.5 est utilisée par défaut pour limiter l'overfitting sur les petits datasets.
 
 ---
 
-## Next Steps
+<div align="center">
 
-1. ✅ Train your first model
-2. ✅ Evaluate metrics
-3. ✅ Push to Git
-4. ✅ Verify GitHub Actions deployment
-5. ✅ Test in production
+**🔬 ML Research Unit - Cancer Detection System**
+© 2025 | Happy Training!
 
-Happy training! 🚀
+</div>

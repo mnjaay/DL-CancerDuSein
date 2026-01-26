@@ -22,6 +22,11 @@ L'API Gateway est le point d'entrée unique pour tous les services. Elle route l
 http://localhost:8004
 ```
 
+### Performance & Timeouts
+
+> [!IMPORTANT]
+> Les requêtes d'inférence (Deep Learning) peuvent être lourdes. L'API Gateway est configurée avec un **timeout de 60 secondes**. Si votre modèle ou votre matériel est lent, assurez-vous que votre client HTTP respecte ce délai.
+
 ### Format des Réponses
 
 Toutes les réponses sont au format JSON.
