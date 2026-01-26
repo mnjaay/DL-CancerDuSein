@@ -56,6 +56,53 @@ Le système est découpé en services spécialisés communiquant en asynchrone :
 | **Frontend v2** | Streamlit, Plotly | Interface utilisateur modulaire et interactive. |
 | **Database** | PostgreSQL 15 | Stockage relationnel des données cliniques. |
 
+### Schéma des Communications
+
+```mermaid
+graph TB
+    subgraph "External"
+        U[👤 Utilisateur / Client]
+    end
+    
+    subgraph "Presentation Layer"
+        F[🎨 Frontend Streamlit<br/><b>Port 8501</b>]
+    end
+    
+    subgraph "Gateway Layer"
+        G[🚪 API Gateway FastAPI<br/><b>Port 8004</b>]
+    end
+    
+    subgraph "Services Layer"
+        A[🔐 Auth Service<br/><b>Port 8000</b>]
+        I[🧠 Inference Service<br/><b>Port 8001</b>]
+        D[💾 Data Service<br/><b>Port 8002</b>]
+    end
+    
+    subgraph "Data Layer"
+        DB[(🗄️ PostgreSQL<br/><b>Port 5432</b>)]
+    end
+    
+    subgraph "ML Assets"
+        M[🤖 CNN Model .h5]
+    end
+
+    U -->|Browse| F
+    F -->|REST API| G
+    G -->|JWT Auth| A
+    G -->|Predict| I
+    G -->|Stats/CRUD| D
+    A -->|SQL| DB
+    D -->|SQL| DB
+    I -->|Loads| M
+
+    style F fill:#e1f5ff,stroke:#0066cc
+    style G fill:#fff4e1,stroke:#d4a017
+    style A fill:#ffe1f5,stroke:#c2185b
+    style I fill:#e1ffe1,stroke:#388e3c
+    style D fill:#f5e1ff,stroke:#7b1fa2
+    style DB fill:#ffe1e1,stroke:#d32f2f
+```
+
 ---
 
 ## 🤖 Pipeline Machine Learning
