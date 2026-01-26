@@ -26,16 +26,16 @@ fi
 source ml/venv/bin/activate
 echo -e "${GREEN}✅ Environnement Python activé.${NC}"
 
-# 2. Nettoyage des données (Preprocessing)
-echo -e "\n${YELLOW}[2/4] Nettoyage et préparation des données...${NC}"
+# 2. Préparation des données (Cleaning + Splitting)
+echo -e "\n${YELLOW}[2/4] Nettoyage et préparation des données (Train/Val/Test)...${NC}"
 if [ ! -d "ml/data/raw" ] || [ -z "$(ls -A ml/data/raw)" ]; then
     echo -e "${RED}❌ Erreur : Pas d'images trouvées dans ml/data/raw.${NC}"
     echo -e "Veuillez copier vos images dans ml/data/raw/Positive et ml/data/raw/Negative avant de continuer."
     exit 1
 fi
 
-python ml/preprocessing.py clean --input ml/data/raw --output ml/data/cleaned --size 128
-echo -e "${GREEN}✅ Données nettoyées et normalisées dans ml/data/cleaned.${NC}"
+python ml/preprocessing.py prepare --input ml/data/raw --output ml/data --size 128
+echo -e "${GREEN}✅ Données préparées et réparties dans ml/data/.${NC}"
 
 # 3. Entraînement du modèle
 echo -e "\n${YELLOW}[3/4] Entraînement du modèle CNN...${NC}"

@@ -1,19 +1,19 @@
 # Configuration d'entraînement du modèle
 
 data:
-  train_dir: "data/train"
-  val_dir: "data/val"
-  test_dir: "data/test"
+  train_dir: "ml/data/train"
+  val_dir: "ml/data/val"
+  test_dir: "ml/data/test"
 
 model:
   img_height: 128
   img_width: 128
   channels: 3
-  checkpoint_dir: "checkpoints"
-  output_path: "../inference-service/models/model.h5"
+  checkpoint_dir: "ml/checkpoints"
+  output_path: "inference-service/models/model.h5"
   use_transfer_learning: true
-  base_model: "VGG16" # Options: VGG16, ResNet50, MobileNetV2
-  fine_tune_epochs: 10
+  base_model: "DenseNet121" # Options: VGG16, ResNet50, MobileNetV2, DenseNet121
+  fine_tune_epochs: 15
 
 
 training:

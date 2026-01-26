@@ -69,6 +69,8 @@ def build_model(config, input_shape=(128, 128, 3), num_classes=1):
             base_model = tf.keras.applications.VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
         elif base_name == "ResNet50":
             base_model = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=input_shape)
+        elif base_name == "DenseNet121":
+            base_model = tf.keras.applications.DenseNet121(weights='imagenet', include_top=False, input_shape=input_shape)
         else:
             base_model = tf.keras.applications.MobileNetV2(weights='imagenet', include_top=False, input_shape=input_shape)
             
@@ -150,7 +152,8 @@ def train_model(config, model, train_ds, val_ds):
     
     callbacks = [
         keras.callbacks.EarlyStopping(monitor='val_loss', patience=config['training']['early_stopping_patience'], restore_best_weights=True),
-        keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7)
+        keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7),
+        keras.callbacks.TensorBoard(log_dir=f"ml/logs/{datetime.now().strftime('%Y%m%d-%H%M%S')}", histogram_freq=1)
     ]
     
     # Phase 1: Entraînement des couches supérieures (Top layers)
