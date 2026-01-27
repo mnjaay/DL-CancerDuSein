@@ -3,7 +3,7 @@ services:
   - type: web
     name: auth-service
     env: docker
-    context: ./auth-service
+    dockerContext: ./auth-service
     dockerfilePath: ./auth-service/Dockerfile
     plan: free
     region: oregon
@@ -22,7 +22,7 @@ services:
   - type: web
     name: data-service
     env: docker
-    context: ./data-service
+    dockerContext: ./data-service
     dockerfilePath: ./data-service/Dockerfile
     plan: free
     region: oregon
@@ -39,7 +39,7 @@ services:
   - type: web
     name: inference-service
     env: docker
-    context: ./inference-service
+    dockerContext: ./inference-service
     dockerfilePath: ./inference-service/Dockerfile
     plan: free
     region: oregon
@@ -59,7 +59,7 @@ services:
   - type: web
     name: api-gateway
     env: docker
-    context: ./api-gateway
+    dockerContext: ./api-gateway
     dockerfilePath: ./api-gateway/Dockerfile
     plan: free
     region: oregon
@@ -87,7 +87,7 @@ services:
   - type: web
     name: frontend
     env: docker
-    context: ./frontend
+    dockerContext: ./frontend
     dockerfilePath: ./frontend/Dockerfile
     plan: free
     region: oregon
