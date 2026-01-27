@@ -10,6 +10,9 @@ router = APIRouter(prefix="/predictions", tags=["predictions"])
 # CREATE - Ajouter une prédiction
 @router.post("/", response_model=PredictionResponse)
 def create_prediction(prediction: PredictionCreate, db: Session = Depends(get_db)):
+    """
+    Crée une nouvelle entrée de prédiction dans la base de données.
+    """
     try:
         db_prediction = Prediction(**prediction.dict())
         db.add(db_prediction)
@@ -27,6 +30,9 @@ def get_predictions(
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
+    """
+    Récupère une liste de prédictions avec pagination.
+    """
     return db.query(Prediction).offset(skip).limit(limit).all()
 
 # READ - Récupérer une prédiction par ID
@@ -78,6 +84,9 @@ def delete_prediction(prediction_id: int, db: Session = Depends(get_db)):
 # BONUS - Statistiques
 @router.get("/stats/summary")
 def get_stats(db: Session = Depends(get_db)):
+    """
+    Génère un résumé statistique des prédictions (total, positifs, négatifs).
+    """
     total = db.query(Prediction).count()
     positive = db.query(Prediction).filter(Prediction.prediction == "Positive").count()
     negative = db.query(Prediction).filter(Prediction.prediction == "Negative").count()

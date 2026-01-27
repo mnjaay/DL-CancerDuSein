@@ -5,33 +5,33 @@ from tensorflow.keras.models import Model
 
 def create_model(input_shape=(128, 128, 3)):
     """
-    Creates a DenseNet121-based model for binary classification.
-    The base model is frozen, and a custom classification head is added.
+    Crée un modèle basé sur DenseNet121 pour la classification binaire.
+    Le modèle de base est gelé, et une tête de classification personnalisée est ajoutée.
     """
-    print("Designing CNN model with Transfer Learning...")
+    print("Conception du modèle CNN avec Transfer Learning...")
 
-    # 1. Load a pre-trained base model (DenseNet121) without its top classification layer
+    # 1. Charger un modèle de base pré-entraîné (DenseNet121) sans sa couche de classification supérieure
     base_model = DenseNet121(input_shape=input_shape,
                              include_top=False,
                              weights='imagenet')
 
-    # 2. Freeze the layers of the pre-trained base model
+    # 2. Geler les couches du modèle de base pré-entraîné
     base_model.trainable = False
 
-    # 3. Create a new classification head on top of the frozen base model
+    # 3. Créer une nouvelle tête de classification au-dessus du modèle de base gelé
     x = base_model.output
-    x = GlobalAveragePooling2D()(x) # Global average pooling layer
-    x = Dense(128, activation='relu')(x) # A dense layer before the output layer
-    output_layer = Dense(1, activation='sigmoid')(x) # Final dense layer for binary classification
+    x = GlobalAveragePooling2D()(x) # Couche de pooling moyen global
+    x = Dense(128, activation='relu')(x) # Une couche dense avant la couche de sortie
+    output_layer = Dense(1, activation='sigmoid')(x) # Couche dense finale pour la classification binaire
 
-    # 4. Combine the base model and the classification head into a complete Model
+    # 4. Combiner le modèle de base et la tête de classification dans un modèle complet
     model = Model(inputs=base_model.input, outputs=output_layer)
-
-    # 5. Compile the model
-    # Note: Optimization parameters like learning rate can be passed or adjusted in train.py generally,
-    # but here we follow the notebook's direct compilation if simple.
-    # However, usually compilation happens outside so we can tune LR.
-    # But to match notebook exactly:
+ 
+    # 5. Compiler le modèle
+    # Remarque : Les paramètres d'optimisation comme le taux d'apprentissage peuvent être passés ou ajustés dans train.py généralement,
+    # mais ici nous suivons la compilation directe du notebook si elle est simple.
+    # Cependant, la compilation se fait généralement à l'extérieur pour pouvoir ajuster le LR.
+    # Mais pour correspondre exactement au notebook :
     model.compile(optimizer='adam',
                   loss='binary_crossentropy',
                   metrics=['accuracy'])

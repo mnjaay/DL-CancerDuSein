@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 def create_generators(train_dir, val_dir, test_dir, img_height=128, img_width=128, batch_size=32):
     """
-    Creates ImageDataGenerators for training, validation, and testing using explicit paths.
+    Crée des ImageDataGenerators pour l'entraînement, la validation et les tests en utilisant des chemins explicites.
     """
-    # Data augmentation for training
+    # Augmentation des données pour l'entraînement
     train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
         rotation_range=20,
@@ -22,10 +22,10 @@ def create_generators(train_dir, val_dir, test_dir, img_height=128, img_width=12
         fill_mode='nearest'
     )
 
-    # Only rescaling for validation and test
+    # Uniquement redimensionnement pour la validation et les tests
     val_test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
 
-    print(f"Loading training data from {train_dir}...")
+    print(f"Chargement des données d'entraînement depuis {train_dir}...")
     train_generator = train_datagen.flow_from_directory(
         train_dir,
         target_size=(img_height, img_width),
@@ -36,7 +36,7 @@ def create_generators(train_dir, val_dir, test_dir, img_height=128, img_width=12
         seed=123
     )
 
-    print(f"Loading validation data from {val_dir}...")
+    print(f"Chargement des données de validation depuis {val_dir}...")
     validation_generator = val_test_datagen.flow_from_directory(
         val_dir,
         target_size=(img_height, img_width),
@@ -47,7 +47,7 @@ def create_generators(train_dir, val_dir, test_dir, img_height=128, img_width=12
         seed=123
     )
 
-    print(f"Loading test data from {test_dir}...")
+    print(f"Chargement des données de test depuis {test_dir}...")
     test_generator = val_test_datagen.flow_from_directory(
         test_dir,
         target_size=(img_height, img_width),
@@ -62,9 +62,9 @@ def create_generators(train_dir, val_dir, test_dir, img_height=128, img_width=12
 
 def prepare_data(input_dir, output_dir, img_size=128, split_ratio=(0.7, 0.15, 0.15)):
     """
-    Splits raw images into train, val, and test directories.
+    Divise les images brutes en répertoires train, val et test.
     """
-    print(f"Preparing data from {input_dir} to {output_dir}...")
+    print(f"Préparation des données de {input_dir} vers {output_dir}...")
     
     classes = [d for d in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, d))]
     
@@ -72,7 +72,7 @@ def prepare_data(input_dir, output_dir, img_size=128, split_ratio=(0.7, 0.15, 0.
         cls_dir = os.path.join(input_dir, cls)
         images = [f for f in os.listdir(cls_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
         
-        # Split images
+        # Diviser les images
         train_imgs, temp_imgs = train_test_split(images, test_size=(1 - split_ratio[0]), random_state=42)
         val_imgs, test_imgs = train_test_split(temp_imgs, test_size=(split_ratio[2] / (split_ratio[1] + split_ratio[2])), random_state=42)
         
@@ -80,7 +80,7 @@ def prepare_data(input_dir, output_dir, img_size=128, split_ratio=(0.7, 0.15, 0.
             split_cls_dir = os.path.join(output_dir, split, cls)
             os.makedirs(split_cls_dir, exist_ok=True)
             
-            print(f"Copying {len(split_imgs)} images to {split_cls_dir}...")
+            print(f"Copie de {len(split_imgs)} images vers {split_cls_dir}...")
             for img in tqdm(split_imgs, desc=f"{split}/{cls}"):
                 shutil.copy2(os.path.join(cls_dir, img), os.path.join(split_cls_dir, img))
 
@@ -88,11 +88,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
     
-    # Prepare command
+    # Commande de préparation (Prepare)
     prepare_parser = subparsers.add_parser("prepare")
-    prepare_parser.add_argument("--input", type=str, required=True, help="Raw data directory")
-    prepare_parser.add_argument("--output", type=str, required=True, help="Output directory for splits")
-    prepare_parser.add_argument("--size", type=int, default=128, help="Image size (kept for compatibility)")
+    prepare_parser.add_argument("--input", type=str, required=True, help="Répertoire des données brutes")
+    prepare_parser.add_argument("--output", type=str, required=True, help="Répertoire de sortie pour les divisions")
+    prepare_parser.add_argument("--size", type=int, default=128, help="Taille de l'image (conservé pour compatibilité)")
     
     args = parser.parse_args()
     

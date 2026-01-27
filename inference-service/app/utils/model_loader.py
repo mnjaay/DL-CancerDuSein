@@ -9,6 +9,9 @@ _model = None
 
 
 def load_model_once():
+    """
+    Charge le modèle une seule fois et le garde en cache pour les prédictions futures.
+    """
     global _model
     if _model is None:
         _model = load_model(MODEL_PATH)

@@ -35,7 +35,7 @@ HTTPX_TIMEOUT = 60.0
 # Health checks
 @app.get("/health")
 async def health():
-    return {"status": "API Gateway is running"}
+    return {"status": "La passerelle API est en cours d'exécution"}
 
 # ===== AUTH SERVICE ROUTES =====
 @app.post("/api/auth/register")

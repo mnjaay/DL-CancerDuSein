@@ -52,7 +52,7 @@ if "last_prediction" not in st.session_state:
 st.markdown("""
     <div style="text-align: center; padding: 2rem 0; margin-bottom: 2rem; background: linear-gradient(135deg, #0066CC 0%, #00C896 100%); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,102,204,0.2);">
         <h1 style="margin: 0; color: white; font-size: 2.5rem; font-weight: 700;">
-            🏥 Cancer Detection AI System
+            🏥 Système d'IA de Détection du Cancer
         </h1>
         <p style="margin: 0.5rem 0 0 0; color: rgba(255,255,255,0.9); font-size: 1.2rem;">
             Système de détection du cancer du sein par intelligence artificielle
@@ -321,9 +321,9 @@ else:
                 <h4 style="color: #1E293B; margin-top: 2rem;">🔬 Technologie</h4>
                 <ul style="color: #64748B; line-height: 1.8;">
                     <li><b>Modèle:</b> TensorFlow/Keras CNN</li>
-                    <li><b>Architecture:</b> Réseau de neurones convolutif</li>
-                    <li><b>Input:</b> Images 128x128 RGB</li>
-                    <li><b>Output:</b> Classification binaire (Positif/Négatif)</li>
+                    <li><b>Architecture:</b> Réseau de neurones convolutif (DenseNet121)</li>
+                    <li><b>Entrée:</b> Images 128x128 RGB</li>
+                    <li><b>Sortie:</b> Classification binaire (Positif/Négatif)</li>
                 </ul>
                 
                 <h4 style="color: #1E293B; margin-top: 2rem;">🏗️ Architecture Système</h4>
@@ -388,7 +388,7 @@ st.markdown("""
     <div style="text-align: center; padding: 2rem 0; color: #64748B;">
        
         <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-            © 2025 Cancer Detection System. All rights reserved.
+            © 2025 Cancer Detection System. Tous droits réservés.
         </p>
     </div>
 """, unsafe_allow_html=True)
