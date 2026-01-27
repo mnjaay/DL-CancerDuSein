@@ -2,7 +2,7 @@ services:
   # 1. Auth Service
   - type: web
     name: auth-service
-    env: python
+    env: docker
     context: .
     dockerfilePath: ./auth-service/Dockerfile
     plan: free
@@ -21,7 +21,7 @@ services:
   # 2. Data Service
   - type: web
     name: data-service
-    env: python
+    env: docker
     context: .
     dockerfilePath: ./data-service/Dockerfile
     plan: free
@@ -38,7 +38,7 @@ services:
   # 3. Inference Service
   - type: web
     name: inference-service
-    env: python
+    env: docker
     context: .
     dockerfilePath: ./inference-service/Dockerfile
     plan: free
@@ -58,7 +58,7 @@ services:
   # 4. API Gateway
   - type: web
     name: api-gateway
-    env: python
+    env: docker
     context: .
     dockerfilePath: ./api-gateway/Dockerfile
     plan: free
@@ -86,7 +86,7 @@ services:
   # 5. Frontend
   - type: web
     name: frontend
-    env: python
+    env: docker
     context: .
     dockerfilePath: ./frontend/Dockerfile
     plan: free
