@@ -9,7 +9,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 ![Git LFS](https://img.shields.io/badge/Git_LFS-Enabled-orange.svg)
 
-**Solution professionnelle de détection précoce du cancer du sein via Deep Learning et architecture Microservices.**
+**Solution professionnelle de détection précoce du cancer du sein via Deep Learning (DenseNet121) et architecture Microservices.**
 
 [Démarrage Rapide](#-démarrage-rapide) • [Documentation ML](#-pipeline-machine-learning) • [Architecture](#-architecture) • [Déploiement](#-déploiement-et-automatisation)
 
@@ -32,10 +32,10 @@
 
 ## 🎯 Vue d'ensemble
 
-Ce projet est un système complet de grade industriel pour l'analyse d'images mammographiques. Il combine la puissance des **CNN (Convolutional Neural Networks)** avec une infrastructure **microservices modulaire** pour garantir scalabilité, performance et maintenabilité.
+Ce projet est un système complet de grade industriel pour l'analyse d'images mammographiques. Il combine la puissance de **DenseNet121** avec une infrastructure **microservices modulaire** pour garantir scalabilité, performance et maintenabilité.
 
 ### 🌟 Points Forts
-- 🧠 **IA de Pointe** : Modèle CNN optimisé avec Data Augmentation.
+- 🧠 **IA de Pointe** : Modèle **DenseNet121** (Transfer Learning) pour une précision accrue.
 - 🏗️ **Architecture Moderne** : Microservices FastAPI synchronisés via une API Gateway.
 - 🎨 **Interface Premium** : Frontend Streamlit v2 modulaire avec design system moderne.
 - 🔄 **CI/CD Robuste** : Automatisation complète via GitHub Actions et Docker Hub.
@@ -83,7 +83,7 @@ graph TB
     end
     
     subgraph "ML Assets"
-        M[🤖 CNN Model .h5]
+        M[🤖 DenseNet121 Model .h5]
     end
 
     U -->|Browse| F
@@ -107,24 +107,19 @@ graph TB
 
 ## 🤖 Pipeline Machine Learning
 
-Le dossier `ml/` contient un pipeline de données complet, détaché des conteneurs pour permettre l'entraînement local fluide.
+Le dossier `ml/` contient un pipeline de données optimisé, aligné sur les standards de recherche actuels.
 
-### 🧹 1. Preprocessing & Nettoyage
-Utilisez `ml/preprocessing.py` pour préparer vos données brutes :
-- ✅ Validation d'images (format, corruption, taille).
+### 🧹 1. Preprocessing & Splitting
+Utilisez `ml/preprocessing.py` pour préparer vos données :
 - ✅ Normalisation et redimensionnement (128x128 RGB).
-- ✅ Équilibrage automatique des classes (Undersampling/Oversampling).
+- ✅ **Nouveau** : Détection automatique des dossiers prêts (`train/val/test`) ou splitting depuis un dossier `raw`.
+- ✅ Data Augmentation avancée intégrée (Rotation, Zoom, Flips).
 
-### 🏋️ 2. Entraînement
-Le script `ml/train.py` implémente :
-- Architecture CNN 3-blocs robuste.
-- Callbacks avancés (EarlyStopping, ModelCheckpoint, ReduceLROnPlateau).
-- Monitoring en temps réel via TensorBoard.
-
-### 📊 3. Évaluation
-`ml/evaluate.py` génère des rapports complets :
-- Matrice de confusion, Courbes ROC et Precision-Recall.
-- Exportation des métriques au format JSON pour le suivi de version.
+### 🏋️ 2. Entraînement (Transfer Learning)
+Le script `ml/train.py` orchestré par `ml/config.yaml` utilise :
+- Architecture **DenseNet121** pré-entraînée.
+- Optimiseur **Adam** avec réduction dynamique du learning rate.
+- Callbacks intelligents (EarlyStopping) pour éviter l'overfitting.
 
 ---
 
@@ -136,10 +131,10 @@ Nous avons créé un script qui gère tout le cycle de vie :
 chmod +x run_full_pipeline.sh
 ./run_full_pipeline.sh
 ```
-*Ce script : installe l'environnement, nettoie les données, entraîne le modèle et met à jour Docker.*
+*Ce script : installe l'environnement, vérifie les données, entraîne le modèle DenseNet et met à jour les conteneurs Docker.*
 
 ### 🐳 Option B : Lancement Docker uniquement
-Si vous avez déjà un modèle prêt :
+Si vous avez déjà un modèle prêt dans `inference-service/models/` :
 ```bash
 docker-compose up -d --build
 ```
@@ -154,24 +149,17 @@ docker-compose up -d --build
 - Git LFS (`brew install git-lfs` ou `apt install git-lfs`)
 
 ### Variables d'Environnement
-Chaque service possède son propre fichier `.env`. Les valeurs par défaut sont configurées pour Docker Compose. **En production, changez impérativement la `SECRET_KEY` de l'Auth Service.**
+Chaque service possède son propre fichier `.env`. Les valeurs par défaut sont configurées pour Docker Compose.
 
 ---
 
 ## 🔄 Déploiement et Automatisation
 
 ### Git LFS (Large File Storage)
-Les modèles ML (.h5) ne sont pas stockés directement dans Git mais via LFS pour éviter de ralentir le repository.
-```bash
-git lfs install
-git lfs track "*.h5"
-```
+Les modèles ML (.h5) sont stockés via LFS pour garantir la légèreté du repository.
 
 ### GitHub Actions
-Le workflow `.github/workflows/model-update.yml` automatise le déploiement :
-1. Détection du nouveau modèle lors d'un `push`.
-2. Build automatique des images Docker.
-3. Push vers Docker Hub.
+Le workflow `.github/workflows/model-update.yml` automatise la reconstruction des images Docker dès qu'un nouveau modèle est détecté sur `main`.
 
 ---
 
@@ -180,32 +168,18 @@ Le workflow `.github/workflows/model-update.yml` automatise le déploiement :
 ```text
 DL-CancerDuSein/
 ├── 📂 api-gateway/         # Passerelle unique (FastAPI)
-│   ├── main.py             # Routage & Workflows
-│   └── dockerfile
 ├── 📂 auth-service/        # Gestion utilisateurs (FastAPI)
-│   ├── app/                # Logique Auth & JWT (Argon2)
-│   └── dockerfile
 ├── 📂 data-service/        # CRUD & Statistiques (FastAPI)
-│   ├── app/                # Modèles & Routes SQL (PostgreSQL)
-│   └── dockerfile
-├── 📂 inference-service/   # Moteur IA (TensorFlow)
-│   ├── app/                # Chargement modèle & Prédiction
-│   ├── models/             # Dossier du modèle .h5 (Git LFS)
-│   └── dockerfile
+├── 📂 inference-service/   # Moteur IA (TensorFlow + DenseNet)
 ├── 📂 frontend/            # Interface utilisateur (Streamlit v2)
-│   ├── 📂 components/      # UI isolée (Auth, Stats, Upload, About)
-│   ├── 📂 config/          # Thèmes & CSS personalisés
-│   ├── 📂 utils/           # Client API & Logique métier
-│   ├── streamlit_app.py    # Point d'entrée application
-│   └── dockerfile
 ├── 📂 ml/                  # Research & Training Pipeline
-│   ├── train.py            # Script d'entraînement CNN
-│   ├── preprocessing.py    # Nettoyage & Augmentation Data
-│   ├── evaluate.py         # Métriques, Confusion Matrix & Plots
-│   └── config.yaml         # Configuration des hyperparamètres
+│   ├── train.py            # Script d'entraînement orchestré
+│   ├── preprocessing.py    # Préparation & Splitting intelligent
+│   ├── model_factory.py    # Définition de l'architecture DenseNet121
+│   └── config.yaml         # Paramètres d'entraînement
 ├── run_full_pipeline.sh    # Script maître d'automatisation (Master)
 ├── setup_ml.sh             # Installation environnement local ML
-└── docker-compose.yml      # Orchestration Microservices Cloud-ready
+└── docker-compose.yml      # Orchestration Microservices
 ```
 
 ---
@@ -219,6 +193,6 @@ DL-CancerDuSein/
 <div align="center">
 
 Made with ❤️ by the Cancer Detection Team
-© 2025 - Tous droits réservés
+© 2026 - Tous droits réservés
 
 </div>

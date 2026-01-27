@@ -18,10 +18,13 @@ router = APIRouter(prefix="/inference", tags=["inference"])
 
 model = load_model_once()
 
-CLASS_NAMES = ["Positive", "Negative"]
+CLASS_NAMES = ["Negative", "Positive"]
 
 # URL du service data
+# URL du service data
 DATA_SERVICE_URL = os.getenv("DATA_SERVICE_URL", "http://data-service:8002")
+if not DATA_SERVICE_URL.startswith("http://") and not DATA_SERVICE_URL.startswith("https://"):
+    DATA_SERVICE_URL = f"http://{DATA_SERVICE_URL}"
 
 
 @router.post("/predict")

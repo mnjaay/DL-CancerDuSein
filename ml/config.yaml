@@ -1,6 +1,7 @@
-# Configuration d'entraînement du modèle
+# Configuration d'entraînement du modèle DenseNet121
 
 data:
+  raw_dir: "ml/data/raw"
   train_dir: "ml/data/train"
   val_dir: "ml/data/val"
   test_dir: "ml/data/test"
@@ -9,21 +10,21 @@ model:
   img_height: 128
   img_width: 128
   channels: 3
-  checkpoint_dir: "ml/checkpoints"
   output_path: "inference-service/models/model.h5"
-  use_transfer_learning: true
-  base_model: "DenseNet121" # Options: VGG16, ResNet50, MobileNetV2, DenseNet121
-  fine_tune_epochs: 15
-
+  base_model: "DenseNet121"
 
 training:
   batch_size: 32
-  epochs: 50
-  early_stopping_patience: 10
+  epochs: 20
+  early_stopping_patience: 3
   learning_rate: 0.001
 
 augmentation:
-  horizontal_flip: true
-  rotation_range: 0.2
+  rotation_range: 20
+  width_shift_range: 0.2
+  height_shift_range: 0.2
+  shear_range: 0.2
   zoom_range: 0.2
-  contrast_range: 0.2
+  horizontal_flip: true
+  vertical_flip: true
+

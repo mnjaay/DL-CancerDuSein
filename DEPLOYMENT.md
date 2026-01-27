@@ -18,9 +18,9 @@ chmod +x run_full_pipeline.sh
 
 **Ce script effectue :**
 1. 🔧 Installation de l'environnement virtuel (`venv`).
-2. 🧹 Nettoyage des images brutes dans `ml/data/raw`.
-3. 🏋️ Entraînement du nouveau modèle (`model.h5`).
-4. 🐳 Reconstruction et redémarrage des conteneurs Docker.
+2. 🔍 **Vérification des données** : Détecte si les données sont prêtes ou s'il faut les diviser.
+3. 🏋️ Entraînement du nouveau modèle **DenseNet121** (`model.h5`).
+4. 🐳 Reconstruction du service d'inférence Docker.
 
 ---
 
@@ -75,15 +75,15 @@ Pour la production, il est recommandé d'utiliser un **Reverse Proxy** (Nginx ou
 
 | Problème | Solution |
 | :--- | :--- |
-| `ReadTimeoutError` | Augmentez `HTTPX_TIMEOUT` dans `api-gateway/main.py` si le modèle est très complexe. |
-| `Out of Memory` | Augmentez la mémoire allouée à Docker Desktop (> 8GB). |
-| Erreur BDD | Lancez `docker-compose down -v` pour réinitialiser les schémas (⚠️ Attention aux données). |
+| `SameFileError` | Le pipeline détecte désormais si les données sont déjà organisées pour éviter ce conflit. |
+| `Out of Memory` | Augmentez la mémoire allouée à Docker Desktop (> 8GB) pour l'entraînement local. |
+| Erreur BDD | Relancez les conteneurs ou vérifiez les logs (`docker logs`). |
 
 ---
 
 <div align="center">
 
-**🚀 Guide de Déploiement v2.0**
+**🚀 Guide de Déploiement v2.1**
 Solution Cancer Detection
-
+Version Janvier 2026
 </div>

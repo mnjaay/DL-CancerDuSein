@@ -18,9 +18,16 @@ app.add_middleware(
 )
 
 # URLs des services
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8000")
-INFERENCE_SERVICE_URL = os.getenv("INFERENCE_SERVICE_URL", "http://inference-service:8001")
-DATA_SERVICE_URL = os.getenv("DATA_SERVICE_URL", "http://data-service:8002")
+def get_service_url(env_var, default):
+    url = os.getenv(env_var, default)
+    if not url.startswith("http://") and not url.startswith("https://"):
+        return f"http://{url}"
+    return url
+
+# URLs des services
+AUTH_SERVICE_URL = get_service_url("AUTH_SERVICE_URL", "http://auth-service:8000")
+INFERENCE_SERVICE_URL = get_service_url("INFERENCE_SERVICE_URL", "http://inference-service:8001")
+DATA_SERVICE_URL = get_service_url("DATA_SERVICE_URL", "http://data-service:8002")
 
 # Config httpx
 HTTPX_TIMEOUT = 60.0

@@ -34,6 +34,8 @@ st.set_page_config(
 
 # Configuration API
 API_BASE_URL = os.getenv("API_GATEWAY_URL", "http://api-gateway:8000")
+if not API_BASE_URL.startswith("http://") and not API_BASE_URL.startswith("https://"):
+    API_BASE_URL = f"http://{API_BASE_URL}"
 
 # Appliquer le CSS custom
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)

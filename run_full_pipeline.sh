@@ -27,15 +27,19 @@ source ml/venv/bin/activate
 echo -e "${GREEN}✅ Environnement Python activé.${NC}"
 
 # 2. Préparation des données (Cleaning + Splitting)
-echo -e "\n${YELLOW}[2/4] Nettoyage et préparation des données (Train/Val/Test)...${NC}"
-if [ ! -d "ml/data/raw" ] || [ -z "$(ls -A ml/data/raw)" ]; then
-    echo -e "${RED}❌ Erreur : Pas d'images trouvées dans ml/data/raw.${NC}"
-    echo -e "Veuillez copier vos images dans ml/data/raw/Positive et ml/data/raw/Negative avant de continuer."
+echo -e "\n${YELLOW}[2/4] Vérification des données...${NC}"
+
+if [ -d "ml/data/raw" ] && [ "$(ls -A ml/data/raw)" ]; then
+    echo -e "${BLUE}Images trouvées dans ml/data/raw. Lancement de la préparation (splitting)...${NC}"
+    python ml/preprocessing.py prepare --input ml/data/raw --output ml/data --size 128
+    echo -e "${GREEN}✅ Données préparées et réparties dans ml/data/.${NC}"
+elif [ -d "ml/data/train" ] && [ "$(ls -A ml/data/train)" ]; then
+    echo -e "${GREEN}✅ Dossier d'entraînement déjà présent. Passage à l'entraînement.${NC}"
+else
+    echo -e "${RED}❌ Erreur : Pas de données trouvées dans ml/data/raw ni dans ml/data/train.${NC}"
+    echo -e "Veuillez placer vos images dans ml/data/raw (pour splitting) ou directement dans ml/data/train/Positive et ml/data/train/Negative."
     exit 1
 fi
-
-python ml/preprocessing.py prepare --input ml/data/raw --output ml/data --size 128
-echo -e "${GREEN}✅ Données préparées et réparties dans ml/data/.${NC}"
 
 # 3. Entraînement du modèle
 echo -e "\n${YELLOW}[3/4] Entraînement du modèle CNN...${NC}"

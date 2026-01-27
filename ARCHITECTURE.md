@@ -2,7 +2,7 @@
 
 ## Vue d'ensemble
 
-Ce document décrit l'architecture complète du système de détection du cancer du sein, basée sur une **architecture microservices** moderne et scalable, couplée à un pipeline de Deep Learning robuste.
+Ce document décrit l'architecture complète du système de détection du cancer du sein, basée sur une **architecture microservices** moderne et scalable, couplée à un pipeline de Deep Learning robuste utilisant **DenseNet121**.
 
 ---
 
@@ -49,7 +49,7 @@ graph TB
     end
 
     subgraph "ML Assets"
-        M[🤖 CNN Model]
+        M[🤖 DenseNet121 Model]
     end
 
     U -->|Access| F
@@ -93,26 +93,26 @@ graph TB
 **Moteur d'IA** :
 - **Framework** : TensorFlow 2.15+
 - **Input** : Images normalisées (128x128x3).
-- **Modèle** : CNN 3-blocs avec Dropout pour éviter l'overfitting.
+- **Modèle** : **DenseNet121** (Transfer Learning) avec tête de classification personnalisée.
 - **Optimisation** : Chargement "Lazy" du modèle via un singleton.
 
 ---
 
 ### 🤖 ML Research Layer (`ml/`)
 
-Dossier indépendant pour la recherche et le développement :
+Dossier dédié à l'entraînement et l'optimisation :
 
-1. **`preprocessing.py`** : Script de nettoyage massif (validation, resize, balance).
-2. **`train.py`** : Script d'entraînement avec gestion des hyperparamètres via `config.yaml`.
-3. **`evaluate.py`** : Evaluation quantitative (Accuracy, Precision, Recall, confusion matrix).
-4. **`explore_data.py`** : Visualisation exploratoire du dataset.
+1. **`preprocessing.py`** : Préparation des données (Data augmentation, splitting train/val/test).
+2. **`model_factory.py`** : Définition de l'architecture DenseNet121.
+3. **`train.py`** : Script d'entraînement orchestré par `config.yaml`.
+4. **`config.yaml`** : Centralisation des hyperparamètres (LR, Batch size, Epochs).
 
 ---
 
 ## Flux de Données ML
 
 ### Pipeline de Production
-1. **Raw Data** ➔ 2. **Preprocessing** ➔ 3. **Training** ➔ 4. **Export Model** ➔ 5. **Docker Build** ➔ 6. **Production**.
+1. **Raw Data** ➔ 2. **Preprocessing/Splitting** ➔ 3. **Training (DenseNet)** ➔ 4. **Export Model** ➔ 5. **Docker Build** ➔ 6. **Production**.
 
 ### Flux CI/CD
 Lorsqu'un nouveau modèle (`model.h5`) est poussé sur la branche `main` :
@@ -125,7 +125,7 @@ Lorsqu'un nouveau modèle (`model.h5`) est poussé sur la branche `main` :
 ## Sécurité
 
 ### Authentification & Autorisation
-- **Argon2** : Algorithme de hachage de pointe utilisé pour les mots de passe (plus sûr que BCrypt).
+- **Argon2** : Algorithme de hachage de pointe utilisé pour les mots de passe.
 - **JWT** : Tokens signés pour la session utilisateur.
 - **Asynchrone** : API Gateway utilise HTTPX pour des appels non-bloquants vers les microservices.
 
@@ -140,6 +140,6 @@ Le système utilise **Docker Compose** pour l'orchestration locale et cloud-read
 <div align="center">
 
 **🏗️ Architecture Documentation - Cancer Detection System**
-Version 2.0 | Mise à jour : Janvier 2025
+Version 2.1 | Mise à jour : Janvier 2026
 
 </div>

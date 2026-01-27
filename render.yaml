@@ -51,7 +51,7 @@ services:
           type: web
           name: data-service
           envVar: SERVICE_URL # Or use internal URL directly if supported
-          property: url
+          property: hostport
       - key: PORT
         value: 8001
 
@@ -69,17 +69,17 @@ services:
         fromService:
           type: web
           name: auth-service
-          property: url
+          property: hostport
       - key: DATA_SERVICE_URL
         fromService:
           type: web
           name: data-service
-          property: url
+          property: hostport
       - key: INFERENCE_SERVICE_URL
         fromService:
           type: web
           name: inference-service
-          property: url
+          property: hostport
       - key: PORT
         value: 8000
 
@@ -97,7 +97,7 @@ services:
         fromService:
           type: web
           name: api-gateway
-          property: url
+          property: hostport
       - key: PORT
         value: 8501
 
