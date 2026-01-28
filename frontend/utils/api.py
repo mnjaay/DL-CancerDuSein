@@ -44,10 +44,19 @@ def make_api_call(
         else:
             return False, f"Méthode HTTP non supportée: {method}"
         
+        # Vérifier si la réponse est du JSON avant de tenter de la parser
+        is_json = "application/json" in response.headers.get("Content-Type", "")
+        
         if response.status_code in [200, 201]:
-            return True, response.json()
+            if is_json:
+                return True, response.json()
+            else:
+                return False, f"Le serveur a renvoyé un succès (200) mais pas de JSON : {response.text[:100]}"
         else:
-            error_detail = response.json().get("detail", response.text)
+            if is_json:
+                error_detail = response.json().get("detail", response.text)
+            else:
+                error_detail = f"Erreur serveur (non-JSON) : {response.text[:200]}"
             return False, f"Erreur {response.status_code}: {error_detail}"
     
     except requests.exceptions.Timeout:
