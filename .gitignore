@@ -1,1 +1,2 @@
-inference-service/models/*.h5
+# Ignorer le modèle lourd pour éviter les erreurs LFS
+inference-service/models/model.h5
