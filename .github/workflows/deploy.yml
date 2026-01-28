@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd "Projet Deep Learning Cancer du sein" || git clone <URL_DE_VOTRE_REPO> "Projet Deep Learning Cancer du sein"
+            cd "Projet Deep Learning Cancer du sein" || git clone https://github.com/mnjaay/DL-CancerDuSein.git "Projet Deep Learning Cancer du sein"
             cd "Projet Deep Learning Cancer du sein"
             git pull origin main
             
