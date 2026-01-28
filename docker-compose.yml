@@ -83,10 +83,21 @@ services:
       - ./frontend/.env
     depends_on:
       - api-gateway
-    ports:
-      - "8501:8501"
+    # On ne l'expose plus directement, Nginx s'en occupe
     environment:
       - API_GATEWAY_URL=http://api-gateway:8000
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api-gateway
 
 volumes:
   postgres_data:
