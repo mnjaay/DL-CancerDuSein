@@ -1,0 +1,32 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger VPS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Executing remote ssh commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd "Projet Deep Learning Cancer du sein" || git clone <URL_DE_VOTRE_REPO> "Projet Deep Learning Cancer du sein"
+            cd "Projet Deep Learning Cancer du sein"
+            git pull origin main
+            
+            # Reconstruction et relance des conteneurs
+            docker compose up -d --build
+            
+            # Nettoyage des images inutilisées
+            docker image prune -f
