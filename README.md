@@ -10,7 +10,7 @@ Ce projet présente une solution complète de **Grade Médical** pour l'analyse 
 
 ## 🚀 Accès Direct
 - **Déploiement Production** : [https://cancer-detection.myftp.org](https://cancer-detection.myftp.org)
-- **Identifiants de Test** : `mouhamed.ndiaye14@univ-thies.sn` / `votre_mot_de_passe`
+- **Identifiants de Test (par mail )** : `mouhamed.ndiaye14@univ-thies.sn`
 
 ---
 
@@ -62,7 +62,7 @@ Ce logiciel est un **système de recherche**. Bien que performant, il ne doit pa
 
 <div align="center">
   
-**Département de Génie Logiciel - Université de Thiès**  
+**Département de Informatique**  
 © 2026 Projet Master 2
 
 </div>

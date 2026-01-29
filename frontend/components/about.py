@@ -77,8 +77,8 @@ def render_about_section():
             <div class="metric-card">
                 <h4 style="color: #00C896; margin-top: 0;">📞 Contact</h4>
                 <p style="color: #64748B; margin: 0;">
-                    <b>Support:</b> support@example.com<br>
-                    <b>GitHub:</b> mnjaay/DL-CancerDuSein
+                    <b>Support:</b> contact@cancer-detection.sn<br>
+                    <b>GitHub:</b> github.com/organisation/DL-CancerDuSein
                 </p>
             </div>
         """)

@@ -366,7 +366,7 @@ else:
                     <h4 style="color: #0066CC; margin-top: 0;">📦 Version</h4>
                     <p style="color: #64748B; margin: 0;">
                         <b>Application:</b> v2.0 (Premium)<br>
-                        <b>Dernière mise à jour:</b> Janvier 2024
+                        <b>Dernière mise à jour:</b> Janvier 2026
                     </p>
                 </div>
             """, unsafe_allow_html=True)
@@ -376,8 +376,8 @@ else:
                 <div class="metric-card">
                     <h4 style="color: #00C896; margin-top: 0;">📞 Contact</h4>
                     <p style="color: #64748B; margin: 0;">
-                        <b>Support:</b> support@example.com<br>
-                        <b>GitHub:</b> mnjaay/DL-CancerDuSein
+                        <b>Support:</b> contact@cancer-detection.sn<br>
+                        <b>GitHub:</b> github.com/organisation/DL-CancerDuSein
                     </p>
                 </div>
             """, unsafe_allow_html=True)
@@ -388,7 +388,7 @@ st.markdown("""
     <div style="text-align: center; padding: 2rem 0; color: #64748B;">
        
         <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-            © 2025 Cancer Detection System. Tous droits réservés.
+            © 2026 Cancer Detection System. Tous droits réservés.
         </p>
     </div>
 """, unsafe_allow_html=True)
