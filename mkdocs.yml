@@ -1,0 +1,38 @@
+site_name: Cancer Detection System
+theme:
+  name: material
+  language: fr
+  palette:
+    primary: indigo
+    accent: blue
+  features:
+    - navigation.sections
+    - navigation.tabs
+    - content.code.copy
+
+nav:
+  - Accueil: index.md
+  - Guide de Démarrage:
+      - Installation: getting-started/installation.md
+      - Démarrage Rapide: getting-started/quickstart.md
+  - Architecture:
+      - Vue d'ensemble: architecture/system-overview.md
+      - Microservices: architecture/microservices.md
+  - Machine Learning:
+      - Pipeline: machine-learning/pipeline.md
+  - API:
+      - Référence: api/reference.md
+  - Guides Spécifiques:
+      - Ngrok: specific-guides/ngrok-guide.md
+      - Déploiement: specific-guides/deployment.md
+  - Communauté:
+      - Contribuer: community/contributing.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html

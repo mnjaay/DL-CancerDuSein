@@ -26,18 +26,17 @@ fi
 source ml/venv/bin/activate
 echo -e "${GREEN}✅ Environnement Python activé.${NC}"
 
-# 2. Préparation des données (Cleaning + Splitting)
-echo -e "\n${YELLOW}[2/4] Vérification des données...${NC}"
+# 2. Nettoyage et Vérification des données
+echo -e "\n${YELLOW}[2/4] Nettoyage et Vérification...${NC}"
 
-if [ -d "ml/data/raw" ] && [ "$(ls -A ml/data/raw)" ]; then
-    echo -e "${BLUE}Images trouvées dans ml/data/raw. Lancement de la préparation (splitting)...${NC}"
-    python ml/preprocessing.py prepare --input ml/data/raw --output ml/data --size 128
-    echo -e "${GREEN}✅ Données préparées et réparties dans ml/data/.${NC}"
-elif [ -d "ml/data/train" ] && [ "$(ls -A ml/data/train)" ]; then
-    echo -e "${GREEN}✅ Dossier d'entraînement déjà présent. Passage à l'entraînement.${NC}"
+if [ -d "ml/data/train" ] && [ -d "ml/data/val" ] && [ -d "ml/data/test" ]; then
+    echo -e "${GREEN}✅ Répertoires de données trouvés.${NC}"
+    # Lancement du script de nettoyage/vérification comme demandé
+    python ml/preprocessing.py check --data_dir ml/data
+    echo -e "${GREEN}✅ Nettoyage et vérification terminés.${NC}"
 else
-    echo -e "${RED}❌ Erreur : Pas de données trouvées dans ml/data/raw ni dans ml/data/train.${NC}"
-    echo -e "Veuillez placer vos images dans ml/data/raw (pour splitting) ou directement dans ml/data/train/Positive et ml/data/train/Negative."
+    echo -e "${RED}❌ Erreur : Répertoires de données (train, val, test) manquants.${NC}"
+    echo -e "Veuillez vous assurer que vos dossiers sont bien dans ml/data/."
     exit 1
 fi
 
@@ -67,6 +66,6 @@ docker compose up -d
 echo -e "\n${GREEN}================================================${NC}"
 echo -e "${GREEN}✨ PIPELINE TERMINÉ AVEC SUCCÈS !${NC}"
 echo -e "${GREEN}================================================${NC}"
-echo -e "Votre application est à jour et disponible sur : ${BLUE}http://localhost:8501${NC}"
+echo -e "Votre application est à jour et disponible sur : ${BLUE}http://localhost${NC}"
 
 deactivate

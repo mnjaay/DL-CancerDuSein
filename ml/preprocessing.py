@@ -84,6 +84,40 @@ def prepare_data(input_dir, output_dir, img_size=128, split_ratio=(0.7, 0.15, 0.
             for img in tqdm(split_imgs, desc=f"{split}/{cls}"):
                 shutil.copy2(os.path.join(cls_dir, img), os.path.join(split_cls_dir, img))
 
+def check_data(data_dir):
+    """
+    Vérifie l'intégrité et affiche un résumé des dossiers train, val et test.
+    """
+    print(f"🔍 Vérification des données dans {data_dir}...")
+    splits = ['train', 'val', 'test']
+    
+    for split in splits:
+        split_path = os.path.join(data_dir, split)
+        if not os.path.exists(split_path):
+            print(f"⚠️  Attention : Le dossier {split} est manquant.")
+            continue
+            
+        classes = [d for d in os.listdir(split_path) if os.path.isdir(os.path.join(split_path, d))]
+        print(f"\n📁 Split: {split.upper()}")
+        
+        total_images = 0
+        for cls in classes:
+            cls_path = os.path.join(split_path, cls)
+            images = [f for f in os.listdir(cls_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            print(f"  - {cls}: {len(images)} images")
+            total_images += len(images)
+            
+            # Optionnel : Vérifier si des fichiers sont corrompus
+            for img_name in images[:5]: # Vérifie juste les 5 premières pour aller vite
+                img_path = os.path.join(cls_path, img_name)
+                try:
+                    img = tf.io.read_file(img_path)
+                    tf.io.decode_image(img)
+                except Exception as e:
+                    print(f"  ❌ Image corrompue détectée : {img_path}")
+        
+        print(f"  Total {split}: {total_images} images")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
@@ -94,9 +128,15 @@ if __name__ == "__main__":
     prepare_parser.add_argument("--output", type=str, required=True, help="Répertoire de sortie pour les divisions")
     prepare_parser.add_argument("--size", type=int, default=128, help="Taille de l'image (conservé pour compatibilité)")
     
+    # Commande de vérification (Check)
+    check_parser = subparsers.add_parser("check")
+    check_parser.add_argument("--data_dir", type=str, default="ml/data", help="Répertoire racine des données (contenant train/val/test)")
+    
     args = parser.parse_args()
     
     if args.command == "prepare":
         prepare_data(args.input, args.output, args.size)
+    elif args.command == "check":
+        check_data(args.data_dir)
     else:
         parser.print_help()

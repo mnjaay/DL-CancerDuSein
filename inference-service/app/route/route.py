@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from PIL import Image
 import httpx
 import os
+import json
 import logging
 from io import BytesIO
 from dotenv import load_dotenv
@@ -18,7 +19,23 @@ router = APIRouter(prefix="/inference", tags=["inference"])
 
 model = load_model_once()
 
-CLASS_NAMES = ["Negative", "Positive"]
+# Charger le mapping des classes dynamiquement
+def load_class_names():
+    try:
+        classes_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "classes.json")
+        if os.path.exists(classes_path):
+            with open(classes_path, 'r') as f:
+                labels = json.load(f)
+                # On convertit les clés en int et on trie pour avoir une liste [label_0, label_1]
+                return [labels[str(i)] for i in sorted(map(int, labels.keys()))]
+    except Exception as e:
+        logger.error(f"Erreur lors du chargement des classes: {e}")
+    
+    # Fallback par défaut (au cas où)
+    return ["Positive", "Negative"]
+
+CLASS_NAMES = load_class_names()
+logger.info(f"Classes chargées: {CLASS_NAMES}")
 
 # URL du service data
 # URL du service data
@@ -46,9 +63,18 @@ async def predict(file: UploadFile = File(...)):
         prediction = model.predict(image_array)[0][0]
         logger.info(f"Prédiction brute: {prediction}")
 
-        predicted_class = CLASS_NAMES[int(prediction >= 0.5)]
+        predicted_class_raw = CLASS_NAMES[int(prediction >= 0.5)]
+        
+        # Mapping logique pour l'utilisateur :
+        # Si la classe détectée est "Cancer", on renvoie "Positive"
+        # Si la classe détectée est "Negative", on renvoie "Negative"
+        if predicted_class_raw.lower() == "cancer":
+            predicted_class = "Positive"
+        else:
+            predicted_class = predicted_class_raw
+
         confidence = float(prediction if prediction >= 0.5 else 1 - prediction)
-        logger.info(f"Classe: {predicted_class}, Confiance: {confidence}")
+        logger.info(f"Classe brute: {predicted_class_raw} -> Finale: {predicted_class}, Confiance: {confidence}")
 
         return {
             "prediction": predicted_class,

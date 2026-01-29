@@ -1,6 +1,7 @@
 import os
 import argparse
 import yaml
+import json
 from model_factory import create_model
 from preprocessing import create_generators
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -60,6 +61,15 @@ def train(config_path):
     # Sauvegarder également une copie dans ml/ pour référence
     model.save("model.h5")
     print("Modèle de référence sauvegardé dans ml/model.h5")
+
+    # 7. Sauvegarder le mapping des classes pour l'inférence
+    class_indices = train_generator.class_indices
+    # Inverser le dictionnaire pour avoir {index: nom_classe}
+    labels = {v: k for k, v in class_indices.items()}
+    labels_path = os.path.join(os.path.dirname(OUTPUT_PATH), "classes.json")
+    with open(labels_path, 'w') as f:
+        json.dump(labels, f)
+    print(f"Mapping des classes sauvegardé dans {labels_path} : {labels}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
