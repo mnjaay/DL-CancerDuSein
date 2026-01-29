@@ -24,15 +24,8 @@ def render_auth_sidebar(api_base_url):
         """, unsafe_allow_html=True)
         
         if st.session_state.token is None:
-            # Tabs pour Login et Register
-            auth_tab1, auth_tab2 = st.tabs(["🔓 Connexion", "📝 Inscription"])
-            
-            with auth_tab1:
-                show_login_form(api_base_url)
-            
-            with auth_tab2:
-                show_register_form(api_base_url)
-            
+            # Afficher uniquement le formulaire de connexion
+            show_login_form(api_base_url)
             return False
         
         else:
