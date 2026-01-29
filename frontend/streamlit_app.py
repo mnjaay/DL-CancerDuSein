@@ -312,10 +312,10 @@ st.markdown("---")
 st.markdown("""
     <div style="text-align: center; padding: 2rem 0; color: #64748B;">
         <p style="margin: 0;">
-            Made with ❤️ and 🧠 by the Cancer Detection Team
+            Made with ❤️ by the Cancer Detection Team
         </p>
         <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-            © 2024 Cancer Detection System. All rights reserved.
+            © 2026 Cancer Detection System. All rights reserved.
         </p>
     </div>
 """, unsafe_allow_html=True)

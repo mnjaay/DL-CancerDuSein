@@ -67,7 +67,7 @@ def render_about_section():
                 <h4 style="color: #0066CC; margin-top: 0;">📦 Version</h4>
                 <p style="color: #64748B; margin: 0;">
                     <b>Application:</b> v2.0 (Premium)<br>
-                    <b>Dernière mise à jour:</b> Janvier 2024
+                    <b>Dernière mise à jour:</b> Janvier 2026
                 </p>
             </div>
         """)
