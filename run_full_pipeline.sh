@@ -58,6 +58,25 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "${BLUE}📤 Push vers Docker Hub : $IMAGE_NAME...${NC}"
     docker push $IMAGE_NAME
     echo -e "${GREEN}✅ Image poussée avec succès.${NC}"
+
+    # 5. Déploiement à distance (VPS)
+    echo -e "\n${YELLOW}[5/5] Déploiement automatique sur le VPS...${NC}"
+    read -p "Voulez-vous mettre à jour le VPS (root@srv1306353) ? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        VPS_HOST="srv1306353"
+        VPS_USER="root"
+        VPS_PATH="~/DL-CancerDuSein"
+        
+        echo -e "${BLUE}⚡ Connexion à $VPS_HOST et mise à jour...${NC}"
+        ssh ${VPS_USER}@${VPS_HOST} "cd ${VPS_PATH} && docker compose pull inference-service && docker compose up -d inference-service"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ VPS mis à jour avec succès !${NC}"
+        else
+            echo -e "${RED}❌ Erreur lors de la mise à jour du VPS. Vérifiez votre connexion SSH.${NC}"
+        fi
+    fi
 fi
 
 echo -e "\n${BLUE}Lancement des services locaux...${NC}"

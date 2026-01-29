@@ -1,89 +1,65 @@
-# 🚀 Guide de Déploiement
+# 🚀 Guide de Déploiement Automatisé
 
-Ce guide décrit comment déployer et automatiser le système de détection du cancer.
+Ce guide explique comment utiliser le pipeline intelligent pour entraîner, sécuriser et déployer le système de détection du cancer.
 
 ---
 
-## 🛠️ Automatisation Locale (Recommandé)
+## 🛠️ Le Pipeline "One-Click" (Recommandé)
 
-Le déploiement manuel a été remplacé par un script maître qui automatise tout le workflow :
+Nous avons consolidé l'ensemble du workflow technique dans un script maître unique. Ce script gère tout, de votre Mac jusqu'à la mise en production sur le VPS.
 
+### 1. Lancement du Pipeline
 ```bash
-# 1. Rendre le script exécutable
 chmod +x run_full_pipeline.sh
-
-# 2. Lancer le pipeline complet
 ./run_full_pipeline.sh
 ```
 
-**Ce script effectue :**
-1. 🔧 Installation de l'environnement virtuel (`venv`).
-2. 🔍 **Vérification des données** : Détecte si les données sont prêtes ou s'il faut les diviser.
-3. 🏋️ Entraînement du nouveau modèle **DenseNet121** (`model.h5`).
-4. 🐳 Reconstruction du service d'inférence Docker.
+### 2. Étapes automatisées par le script :
+- **🔍 Audit de Données** : Vérifie l'intégrité des images et les répartitions (Train/Val/Test).
+- **🏋️ Entraînement IA** : Lance l'apprentissage DenseNet121 et génère le fichier de mapping `classes.json`.
+- **🐳 Build Docker** : Reconstruit l'image de l'Inference Service en y incluant le nouveau modèle.
+- **📤 Docker Hub** : Pousse l'image vers votre registre distant (`mnjaay312/cancer-detection-inference`).
+- **☁️ Déploiement VPS** : Se connecte en SSH à votre serveur et met à jour instantanément les services en ligne.
 
 ---
 
-## 🐳 Déploiement Docker Classique
+## 🌍 Déploiement sur le Cloud (VPS)
 
-Si vous souhaitez simplement lancer les services sans ré-entraîner le modèle :
+### Configuration Requise sur le VPS
+- **Docker & Docker Compose** installés.
+- **Clé SSH** configurée pour permettre au script local de piloter le serveur sans mot de passe.
 
+### Mise à jour manuelle (si besoin)
+Si vous ne souhaitez pas utiliser le script maître, vous pouvez forcer la mise à jour sur le VPS avec :
 ```bash
-# Construction et lancement
-docker-compose up -d --build
+docker compose pull inference-service
+docker compose up -d inference-service
 ```
 
-**Accès :**
-- **Frontend** : [http://localhost:8501](http://localhost:8501)
-- **API Gateway** : [http://localhost:8004](http://localhost:8004)
-- **Stats & Historique** : Disponibles dans l'interface Streamlit.
+---
+
+## 📦 Gestion des Modèles Lourds (Git LFS)
+
+Pour éviter de saturer Git, le modèle `.h5` est exclu du repository Git standard (via `.gitignore`). 
+- **Local** : Le modèle est stocké dans `inference-service/models/`.
+- **Production** : Le modèle est transporté via l'image Docker poussée sur Docker Hub.
 
 ---
 
-## 🔄 CI/CD et Modèles Volumineux
+## 🐛 Résolution des Problèmes Courants
 
-### 🐘 Git LFS (Large File Storage)
-Étant donné que les modèles `.h5` dépassent souvent les limites de Git, nous utilisons **Git LFS**.
-Avant tout `git push`, assurez-vous que LFS est actif :
-```bash
-git lfs install
-git lfs track "*.h5"
-```
-
-### 🤖 GitHub Actions
-Le déploiement est automatisé via `.github/workflows/model-update.yml`. 
-Dès qu'un fichier `.h5` est détecté dans un commit sur `main` :
-1. GitHub lance un serveur de build.
-2. L'image Docker de l'Inference Service est reconstruite.
-3. L'image est poussée sur votre Docker Hub pour mise à jour automatique.
-
----
-
-## ☁️ Déploiement Cloud (Production)
-
-### VPS (DigitalOcean, Linode, AWS EC2)
-1. Installez Docker et Docker Compose.
-2. Clonez le repository.
-3. Utilisez le script maître ou lancez Docker Compose.
-
-### HTTPS & DNS
-Pour la production, il est recommandé d'utiliser un **Reverse Proxy** (Nginx ou Traefik) pour gérer le SSL via **Let's Encrypt**.
-
----
-
-## 🐛 Troubleshooting
-
-| Problème | Solution |
-| :--- | :--- |
-| `SameFileError` | Le pipeline détecte désormais si les données sont déjà organisées pour éviter ce conflit. |
-| `Out of Memory` | Augmentez la mémoire allouée à Docker Desktop (> 8GB) pour l'entraînement local. |
-| Erreur BDD | Relancez les conteneurs ou vérifiez les logs (`docker logs`). |
+| Problème | Cause Possible | Solution |
+| :--- | :--- | :--- |
+| **Inversion de Résultats** | Décalage des index de classes | Résolu : Le script génère maintenant un `classes.json` dynamique. |
+| **FileNotFoundError (.h5)** | Modèle manquant dans l'image | Relancez le pipeline avec l'option **(y)** pour le push Docker Hub. |
+| **Erreur SSH** | Clé SSH non reconnue | Ajoutez votre clé publique sur le VPS (`ssh-copy-id root@srv1306353`). |
 
 ---
 
 <div align="center">
 
-**🚀 Guide de Déploiement v2.1**
-Solution Cancer Detection
-Version Janvier 2026
+**🚀 Guide de Déploiement v3.0**
+Solution Cancer Detection | Automatisation Totale
+Mise à jour : Janvier 2026
+
 </div>

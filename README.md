@@ -35,11 +35,11 @@
 Ce projet est un système complet de grade industriel pour l'analyse d'images mammographiques. Il combine la puissance de **DenseNet121** avec une infrastructure **microservices modulaire** pour garantir scalabilité, performance et maintenabilité.
 
 ### 🌟 Points Forts
-- 🧠 **IA de Pointe** : Modèle **DenseNet121** (Transfer Learning) pour une précision accrue.
-- 🏗️ **Architecture Moderne** : Microservices FastAPI synchronisés via une API Gateway.
+- 🧠 **IA de Pointe** : Modèle **DenseNet121** (Transfer Learning) avec **mapping de classes dynamique**.
+- 🏗️ **Architecture Moderne** : Microservices FastAPI synchronisés via une API Gateway et filtrés par **Nginx**.
 - 🎨 **Interface Premium** : Frontend Streamlit v2 modulaire avec design system moderne.
-- 🔄 **CI/CD Robuste** : Automatisation complète via GitHub Actions et Docker Hub.
-- 💾 **Versioning Modèle** : Suivi des fichiers lourds (.h5) via Git LFS.
+- 🔄 **Pipeline Cloud-Ready** : Automatisation complète incluant le déploiement SSH sur VPS.
+- 💾 **Versioning Modèle** : Suivi des fichiers lourds (.h5) via Git LFS et Docker Hub.
 
 ---
 
@@ -131,7 +131,7 @@ Nous avons créé un script qui gère tout le cycle de vie :
 chmod +x run_full_pipeline.sh
 ./run_full_pipeline.sh
 ```
-*Ce script : installe l'environnement, vérifie les données, entraîne le modèle DenseNet et met à jour les conteneurs Docker.*
+*Ce script : installe l'environnement, vérifie les données, entraîne le modèle, génère le mapping des classes, construit l'image Docker, la pousse sur le Hub et **met à jour automatiquement votre VPS via SSH**.*
 
 ### 🐳 Option B : Lancement Docker uniquement
 Si vous avez déjà un modèle prêt dans `inference-service/models/` :
@@ -150,6 +150,14 @@ docker-compose up -d --build
 
 ### Variables d'Environnement
 Chaque service possède son propre fichier `.env`. Les valeurs par défaut sont configurées pour Docker Compose.
+
+---
+
+### ☁️ Déploiement Cloud (VPS)
+Le déploiement est piloté depuis votre machine locale. Une fois le push Docker Hub terminé, le script automatise la mise à jour sur le serveur distant :
+1. Connexion SSH sécurisée.
+2. `docker compose pull` pour récupérer l'image fraîche.
+3. `docker compose up -d` pour redémarrer l'IA avec le nouveau modèle.
 
 ---
 
