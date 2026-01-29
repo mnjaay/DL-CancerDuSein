@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
@@ -157,11 +157,10 @@ async def predict_and_save(file: UploadFile = File(...)):
             )
             
             if predict_response.status_code != 200:
-                return {
-                    "error": "Erreur lors de la prédiction",
-                    "status_code": predict_response.status_code,
-                    "detail": predict_response.text
-                }
+                raise HTTPException(
+                    status_code=predict_response.status_code,
+                    detail=f"Erreur lors de la prédiction: {predict_response.text}"
+                )
                 
             prediction_data = predict_response.json()
         
@@ -179,12 +178,10 @@ async def predict_and_save(file: UploadFile = File(...)):
             )
             
             if save_response.status_code not in [200, 201]:
-                return {
-                    "error": "Erreur lors de la sauvegarde",
-                    "status_code": save_response.status_code,
-                    "detail": save_response.text,
-                    "prediction": prediction_data
-                }
+                raise HTTPException(
+                    status_code=save_response.status_code,
+                    detail=f"Erreur lors de la sauvegarde: {save_response.text}"
+                )
         
         return {
             "prediction": prediction_data,
