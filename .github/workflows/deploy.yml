@@ -23,6 +23,10 @@ jobs:
           script: |
             cd "Projet Deep Learning Cancer du sein" || git clone https://github.com/mnjaay/DL-CancerDuSein.git "Projet Deep Learning Cancer du sein"
             cd "Projet Deep Learning Cancer du sein"
+            
+            # Correction si init-db.sql a été créé comme un dossier par erreur
+            if [ -d "init-db.sql" ]; then rm -rf init-db.sql; fi
+            
             git pull origin main
             
             # Reconstruction et relance des conteneurs

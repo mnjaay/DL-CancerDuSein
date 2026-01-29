@@ -48,10 +48,20 @@ echo -e "${GREEN}✅ Entraînement terminé. Nouveau modèle généré.${NC}"
 
 # 4. Déploiement Docker
 echo -e "\n${YELLOW}[4/4] Déploiement des conteneurs Docker...${NC}"
-echo -e "${BLUE}Reconstruction de l'image d'inférence avec le nouveau modèle...${NC}"
-docker compose up -d --build inference-service
+echo -e "${BLUE}Reconstruction de l'image d'inférence...${NC}"
+docker compose build inference-service
 
-echo -e "\n${BLUE}Redémarrage des autres services si nécessaire...${NC}"
+# Optionnel : Push vers Docker Hub pour le VPS
+read -p "Voulez-vous pousser l'image sur Docker Hub pour le VPS ? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    IMAGE_NAME="mnjaay312/cancer-detection-inference:latest"
+    echo -e "${BLUE}📤 Push vers Docker Hub : $IMAGE_NAME...${NC}"
+    docker push $IMAGE_NAME
+    echo -e "${GREEN}✅ Image poussée avec succès.${NC}"
+fi
+
+echo -e "\n${BLUE}Lancement des services locaux...${NC}"
 docker compose up -d
 
 echo -e "\n${GREEN}================================================${NC}"

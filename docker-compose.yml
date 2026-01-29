@@ -63,7 +63,7 @@ services:
       - DATABASE_URL=postgresql://user:password@postgres:5432/cancer_db
 
   inference-service:
-    image: mnjaay/cancer-detection-inference:latest
+    image: mnjaay312/cancer-detection-inference:latest
     container_name: inference-service
     restart: always
     ports:
