@@ -61,20 +61,25 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # 5. Déploiement à distance (VPS)
     echo -e "\n${YELLOW}[5/5] Déploiement automatique sur le VPS...${NC}"
-    read -p "Voulez-vous mettre à jour le VPS (root@srv1306353) ? (y/n) " -n 1 -r
+    read -p "Voulez-vous mettre à jour le VPS (root@srv1306353) ? (y/n) " update_vps
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        VPS_HOST="srv1306353"
-        VPS_USER="root"
-        VPS_PATH="~/DL-CancerDuSein"
-        
-        echo -e "${BLUE}⚡ Connexion à $VPS_HOST et mise à jour...${NC}"
-        ssh ${VPS_USER}@${VPS_HOST} "cd ${VPS_PATH} && docker compose pull inference-service && docker compose up -d inference-service"
+    if [[ "$update_vps" == "y" ]]; then
+        # Vérifier si l'hôte est résolvable
+        if ! host srv1306353 > /dev/null 2>&1 && ! ping -c 1 srv1306353 > /dev/null 2>&1; then
+            echo -e "${YELLOW}⚠️  Attention : Le nom d'hôte 'srv1306353' ne semble pas résolvable depuis votre machine.${NC}"
+            read -p "Entrez l'adresse IP de votre VPS (ou appuyez sur Entrée pour réessayer avec le nom actuel) : " vps_ip
+            vps_host=${vps_ip:-"srv1306353"}
+        else
+            vps_host="srv1306353"
+        fi
+
+        echo -e "${BLUE}⚡ Connexion à $vps_host et mise à jour...${NC}"
+        ssh root@$vps_host "cd ~/DL-CancerDuSein && docker compose pull inference-service && docker compose up -d inference-service"
         
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}✅ VPS mis à jour avec succès !${NC}"
         else
-            echo -e "${RED}❌ Erreur lors de la mise à jour du VPS. Vérifiez votre connexion SSH.${NC}"
+            echo -e "${RED}❌ Échec de la mise à jour du VPS. Vérifiez votre connexion SSH ou l'adresse IP.${NC}"
         fi
     fi
 fi

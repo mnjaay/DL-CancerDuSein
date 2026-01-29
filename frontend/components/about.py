@@ -8,7 +8,7 @@ def render_about_section():
     """
     Affiche les informations détaillées sur le projet
     """
-    st.markdown("""
+    st.html("""
         <div class="glass-card">
             <h3 style="color: #0066CC; margin-top: 0;">🏥 Système de Détection du Cancer du Sein</h3>
             
@@ -36,12 +36,12 @@ def render_about_section():
                 <li><b>Frontend:</b> Interface utilisateur (Streamlit)</li>
             </ul>
         </div>
-    """, unsafe_allow_html=True)
+    """)
     
     st.markdown("---")
     
     # Avertissement médical
-    st.markdown("""
+    st.html("""
         <div style="background: #FEF2F2; border-left: 4px solid #DC2626; padding: 1.5rem; border-radius: 12px;">
             <h3 style="margin-top: 0; color: #991B1B; display: flex; align-items: center;">
                 <span style="font-size: 1.5rem; margin-right: 0.5rem;">⚠️</span>
@@ -54,7 +54,7 @@ def render_about_section():
                 doivent être validés par un professionnel de la santé qualifié.
             </p>
         </div>
-    """, unsafe_allow_html=True)
+    """)
     
     st.markdown("---")
     
@@ -62,7 +62,7 @@ def render_about_section():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
+        st.html("""
             <div class="metric-card">
                 <h4 style="color: #0066CC; margin-top: 0;">📦 Version</h4>
                 <p style="color: #64748B; margin: 0;">
@@ -70,10 +70,10 @@ def render_about_section():
                     <b>Dernière mise à jour:</b> Janvier 2024
                 </p>
             </div>
-        """, unsafe_allow_html=True)
+        """)
     
     with col2:
-        st.markdown("""
+        st.html("""
             <div class="metric-card">
                 <h4 style="color: #00C896; margin-top: 0;">📞 Contact</h4>
                 <p style="color: #64748B; margin: 0;">
@@ -81,4 +81,4 @@ def render_about_section():
                     <b>GitHub:</b> mnjaay/DL-CancerDuSein
                 </p>
             </div>
-        """, unsafe_allow_html=True)
+        """)
