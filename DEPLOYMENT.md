@@ -1,61 +1,74 @@
-# 🚀 Guide de Déploiement & Sécurisation
+# 🚀 Manuel de Déploiement et Opérations Cloud
 
-Ce guide détaille les étapes pour déployer le système en production avec une sécurité maximale.
-
----
-
-## 🛠️ Pipeline "One-Click"
-Le script `run_full_pipeline.sh` automatise :
-1. L'audit des données.
-2. L'entraînement IA.
-3. Le packaging Docker du modèle (Docker Hub).
-4. Le déploiement SSH sur le VPS.
+Ce guide détaille la procédure de mise en production et de maintenance du système sur un VPS (Virtual Private Server).
 
 ---
 
-## 🔒 Activation HTTPS (SSL)
-Le système utilise **Let's Encrypt** pour sécuriser les communications.
+## 📡 1. Stratégie de Déploiement "Zero-Down-Time"
 
-### 1. Prérequis sur le VPS
-Le domaine doit être configuré (ex: `cancer-detection.myftp.org`).
-Installez Certbot sur le VPS :
-```bash
-sudo apt update && sudo apt install -y certbot
-```
+### Le Pipeline Séquentiel
+Le script `run_full_pipeline.sh` implémente le workflow suivant :
+1. **Audit** : Validation des datasets ML.
+2. **Train** : Génération du modèle `.h5` et du `classes.json`.
+3. **Packaging** : Injection des artefacts IA dans l'image Docker de l'Inference Service.
+4. **Push** : Publication sur **Docker Hub**.
+5. **Sync** : Notification SSH au VPS pour déclencher le `pull` et le `restart`.
 
-### 2. Génération du Certificat
-Le port 80 doit être libre (arrêtez Nginx si besoin) :
+---
+
+## 🔒 2. Gestion de la Sécurité SSL (Production)
+
+### Configuration Certbot
+Sur le VPS Hostinger, les certificats sont générés une seule fois :
 ```bash
-docker compose stop nginx
+# Commande pour générer les certificats (Nginx doit être stoppé temporairement)
 sudo certbot certonly --standalone -d cancer-detection.myftp.org
 ```
 
-### 3. Basculement Production
-Une fois le certificat généré :
-1. Activez les lignes SSL dans `docker-compose.yml` (Ports 443 et volume `/etc/letsencrypt`).
-2. Utilisez le fichier `nginx/nginx.conf.prod` (copiez-le vers `nginx/nginx.conf`).
-3. Relancez : `docker compose up -d --build nginx`.
+### Mécanisme de Bascule (Switch)
+Comme le fichier `docker-compose.yml` et `nginx.conf` diffèrent entre le développement local et la production, nous utilisons les backups :
+- **Sur le VPS** : Toujours exécuter `cp nginx/nginx.conf.prod nginx/nginx.conf` après un `git pull`.
+- **Ports** : Assurez-vous que le port **443** est ouvert dans le pare-feu du VPS (UFW ou console Hostinger).
 
 ---
 
-## 💻 Développement Local
-Si vous travaillez sur votre Mac, le SSL ne fonctionnera pas (pas de certificats locaux).
-**Pour revenir en mode local :**
-1. Commentez les lignes SSL dans `docker-compose.yml`.
-2. Utilisez la version simple de `nginx/nginx.conf` (sans SSL).
-3. Accédez à `http://localhost`.
+## 🛠️ 3. Commandes de Maintenance Utiles
+
+### Vérification des Logs
+```bash
+# Voir les logs du moteur IA en direct
+docker compose logs -f inference-service
+
+# Voir les erreurs de redirection Nginx
+docker compose logs nginx
+```
+
+### Mise à jour d'un service spécifique
+```bash
+# Mettre à jour uniquement le frontend sans couper le reste
+git pull
+docker compose up -d --build frontend
+```
+
+### Nettoyage du Serveur
+```bash
+# Libérer de l'espace disque sur le VPS (supprime les anciennes images)
+docker system prune -f
+```
 
 ---
 
-## 🐛 Résolution des Problèmes
-| Problème | Solution |
-| :--- | :--- |
-| **Erreur SSL Nginx** | Vérifiez que le volume `/etc/letsencrypt` est bien monté dans `docker-compose.yml`. |
-| **Upload bloqué** | Nginx est configuré à 50Mo. Si besoin, augmentez `client_max_body_size` dans `nginx.conf`. |
-| **Erreur API Invalide** | Consultez les logs du Gateway : `docker compose logs api-gateway`. |
+## 📋 4. Checklist Post-Déploiement
+- [ ] Accès HTTPS fonctionnel (cadenas vert).
+- [ ] Redirection HTTP -> HTTPS active.
+- [ ] Upload d'image de 5 Mo réussi (test client_max_body_size).
+- [ ] Historique des prédictions persistant après redémarrage.
 
 ---
 
 <div align="center">
-**Guide de Déploiement v3.5** | Janvier 2026
+  
+**Guide Opérationnel v4.0**  
+*Ingénierie DevOps & IA*
+
 </div>

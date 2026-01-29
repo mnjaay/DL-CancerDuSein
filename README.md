@@ -1,81 +1,68 @@
-# 🏥 Système de Détection du Cancer du Sein par IA
+# 🏥 Système IA de Détection du Cancer du Sein
 
-<div align="center">
+[![Production](https://img.shields.io/badge/Production-Secure_HTTPS-green.svg)](https://cancer-detection.myftp.org)
+[![Python](https://img.shields.io/badge/Language-Python_3.11-blue.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Infrastructure-Docker_Compose-blue.svg)](https://www.docker.com/)
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15+-orange.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
-![SSL](https://img.shields.io/badge/SSL-HTTPS-green.svg)
-![Docker](https://img.shields.io/badge/Docker-Microservices-blue.svg)
-
-**Solution IA sécurisée pour l'analyse mammographique | HTTPS : [cancer-detection.myftp.org](https://cancer-detection.myftp.org)**
-
-</div>
+Ce projet présente une solution complète de **Grade Médical** pour l'analyse automatisée de mammographies numériques. Il intègre des recherches avancées en Vision par Ordinateur (Deep Learning) au sein d'une infrastructure logicielle sécurisée.
 
 ---
 
-## 🌟 Vue d'ensemble
-Ce projet implémente un système de détection du cancer du sein utilisant le Deep Learning (**DenseNet121**). L'architecture est basée sur des **microservices** pour garantir une scalabilité et une sécurité de niveau hospitalier.
-
-### 🛡️ Caractéristiques Principales
-- 🧠 **DenseNet121** : Précision accrue via Transfer Learning.
-- 🔒 **HTTPS Global** : Sécurisation via Let's Encrypt et Nginx.
-- 🚧 **API Gateway** : Orchestration centralisée et masquage de l'infrastructure interne.
-- 📈 **Dashboard Premium** : Interface Streamlit avec historique et statistiques en temps réel.
-- 🚀 **Pipeline "One-Click"** : Entraînement et déploiement VPS automatisés.
+## 🚀 Accès Direct
+- **Déploiement Production** : [https://cancer-detection.myftp.org](https://cancer-detection.myftp.org)
+- **Identifiants de Test** : `mouhamed.ndiaye14@univ-thies.sn` / `votre_mot_de_passe`
 
 ---
 
-## 🏗️ Architecture Technique
-Le système s'articule autour d'un **Reverse Proxy Nginx** qui sert de barrière de sécurité et de point d'entrée unique.
-
-| Composant | Technologie | Rôle |
-| :--- | :--- | :--- |
-| **Frontend** | Streamlit | Interface utilisateur Premium |
-| **API Gateway** | FastAPI | Routage et agrégation inter-services |
-| **Auth Service** | FastAPI + JWT | Sécurité et accès (Login uniquement) |
-| **Inference** | TensorFlow | Moteur de prédiction IA |
-| **Data Service** | FastAPI + SQL | Persistance des analyses |
-| **Database** | PostgreSQL | Stockage SQL robuste |
+## 🧠 Expertise Machine Learning
+Le cœur du système repose sur l'architecture **DenseNet-121**, pré-entraînée sur ImageNet et affinée (Fine-tuning) pour la mammographie.
+- **Prétraitement** : Équilibrage d'histogramme, normalisation globale et redimensionnement bicubique.
+- **Mapping Dynamique** : Système évitant toute confusion de labels grâce à `classes.json`.
+- **Confiance** : Chaque prédiction inclut un score de probabilité Bayesienne pour assister le diagnostic.
 
 ---
 
-## 🚀 Démarrage
+## 🏗️ Architecture & Composants
+Le système est fragmenté en microservices pour une modularité totale.
 
-### 🚀 Production (VPS)
-Le site est déployé et sécurisé sur : `https://cancer-detection.myftp.org`
-
-### 💻 Local (Mac/PC)
-1. Clonez le projet.
-2. Lancez le pipeline :
-   ```bash
-   chmod +x run_full_pipeline.sh
-   ./run_full_pipeline.sh
-   ```
-3. Accédez à `http://localhost`.
+- **`nginx/`** : Gardien de la sécurité (SSL/TLS v1.3).
+- **`frontend/`** : Interface Streamlit optimisée pour l'analyse visuelle.
+- **`api-gateway/`** : Chef d'orchestre des requêtes REST.
+- **`inference-service/`** : Conteneur hautes performances pour les calculs TensorFlow.
+- **`auth-service/`** : Gestionnaire d'identités (Hashage Argon2).
+- **`data-service/`** : Gardien de l'historique médical.
 
 ---
 
-## 📁 Structure du Projet
-```text
-.
-├── 📂 nginx/             # Configuration Reverse Proxy & SSL
-├── 📂 api-gateway/       # Passerelle unique (FastAPI)
-├── 📂 auth-service/      # Gestion identité (JWT)
-├── 📂 inference-service/ # Moteur IA (DenseNet121)
-├── 📂 data-service/      # CRUD & Statistiques
-├── 📂 frontend/          # Streamlit v2 (Premium)
-├── 📂 ml/                # Pipeline d'entraînement IA
-└── docker-compose.yml    # Orchestration générale
+## 📦 Installation Professionnelle
+
+### Standard (via Docker)
+```bash
+# Lancement de l'infrastructure complète
+docker-compose up -d --build
+```
+
+### Pipeline Automatisé (Master script)
+```bash
+# Automatise de l'entraînement au déploiement VPS
+./run_full_pipeline.sh
 ```
 
 ---
 
-## ⚠️ Avertissement Médical
-Ce système est un **outil d'aide à la décision** à des fins de recherche. Il ne remplace en aucun cas un diagnostic médical. Toute analyse doit être validée par un professionnel de santé qualifié.
+## 🛠️ Maintenance & Administration
+- **Bascule Local/Prod** : Utilisez `switch_env.sh` (sur le VPS ou localement).
+- **Mises à jour IA** : Remplacez simplement le fichier `.h5` dans `inference-service/models/` et relancez le build.
+- **Certificats** : Renouvellement automatique assuré par Certbot sur le serveur.
 
 ---
 
+## ⚖️ Conformité & Avertissement
+Ce logiciel est un **système de recherche**. Bien que performant, il ne doit pas être utilisé comme unique base de diagnostic médical sans supervision humaine qualifiée.
+
 <div align="center">
-Made with ❤️ | © 2026 Cancer Detection Project
+  
+**Département de Génie Logiciel - Université de Thiès**  
+© 2026 Projet Master 2
+
 </div>
