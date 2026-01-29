@@ -75,10 +75,11 @@ Pour éviter toute inversion de prédiction, le système utilise un fichier **`c
 ## 4. Pipeline d'Automatisation (CI/CD)
 Le projet intègre un pipeline complet via le script **`run_full_pipeline.sh`**.
 
-### Flux de Travail
-1. **Validation** : Vérification de l'intégrité des données (`preprocessing.py check`).
-2. **Training** : Entraînement du modèle et export vers `inference-service/models/`.
-3. **Build** : Reconstruction de l'image Docker avec le nouveau modèle "cuit" à l'intérieur.
+### Flux CI/CD (Local-to-Cloud)
+Plutôt que d'utiliser des outils tiers complexes, le système utilise un pipeline maître direct :
+- **Build Local** : Docker construit l'image sur votre machine (Mac).
+- **Registry** : L'image est poussée sur **Docker Hub**.
+- **Remote Update** : Le VPS est notifié par SSH pour tirer la mise à jour.
 4. **Push** : Distribution de l'image sur **Docker Hub** (`mnjaay312/cancer-detection-inference`).
 5. **Deploy** : Déploiement automatisé sur le **VPS distant** via SSH.
 

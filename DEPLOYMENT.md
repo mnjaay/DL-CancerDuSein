@@ -38,11 +38,12 @@ docker compose up -d inference-service
 
 ---
 
-## 📦 Gestion des Modèles Lourds (Git LFS)
+## 📦 Transport du Modèle IA (Docker Hub)
 
-Pour éviter de saturer Git, le modèle `.h5` est exclu du repository Git standard (via `.gitignore`). 
-- **Local** : Le modèle est stocké dans `inference-service/models/`.
-- **Production** : Le modèle est transporté via l'image Docker poussée sur Docker Hub.
+Pour garantir la légèreté du repository Git et éviter les erreurs de transfert, le modèle `.h5` n'est **pas** stocké sur Git. 
+- **Local** : Le modèle est généré dans `inference-service/models/`.
+- **Packaging** : Lors du build Docker, le modèle est inclus directement dans l'image.
+- **Production** : Le VPS télécharge l'image complète depuis Docker Hub. C'est la méthode la plus robuste pour distribuer des modèles de Deep Learning.
 
 ---
 

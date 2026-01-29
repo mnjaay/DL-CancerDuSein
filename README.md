@@ -7,7 +7,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-red.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![Git LFS](https://img.shields.io/badge/Git_LFS-Enabled-orange.svg)
+![Infrastructure](https://img.shields.io/badge/Infrastructure-Microservices-green.svg)
 
 **Solution professionnelle de détection précoce du cancer du sein via Deep Learning (DenseNet121) et architecture Microservices.**
 
@@ -39,7 +39,7 @@ Ce projet est un système complet de grade industriel pour l'analyse d'images ma
 - 🏗️ **Architecture Moderne** : Microservices FastAPI synchronisés via une API Gateway et filtrés par **Nginx**.
 - 🎨 **Interface Premium** : Frontend Streamlit v2 modulaire avec design system moderne.
 - 🔄 **Pipeline Cloud-Ready** : Automatisation complète incluant le déploiement SSH sur VPS.
-- 💾 **Versioning Modèle** : Suivi des fichiers lourds (.h5) via Git LFS et Docker Hub.
+- 💾 **Distribution par Conteneur** : Le modèle IA est transporté en toute sécurité via Docker Hub.
 
 ---
 
@@ -156,8 +156,11 @@ Chaque service possède son propre fichier `.env`. Les valeurs par défaut sont 
 ### ☁️ Déploiement Cloud (VPS)
 Le déploiement est piloté depuis votre machine locale. Une fois le push Docker Hub terminé, le script automatise la mise à jour sur le serveur distant :
 1. Connexion SSH sécurisée.
-2. `docker compose pull` pour récupérer l'image fraîche.
+2. `docker compose pull` pour récupérer l'image fraîche depuis Docker Hub.
 3. `docker compose up -d` pour redémarrer l'IA avec le nouveau modèle.
+
+> [!NOTE]
+> Cette méthode est plus fiable que Git LFS pour les fichiers lourds, car elle garantit que le modèle est "scellé" dans l'image Docker de production.
 
 ---
 

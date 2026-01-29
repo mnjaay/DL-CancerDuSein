@@ -1,2 +1,64 @@
-# Ignorer le modèle lourd pour éviter les erreurs LFS
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+bin/
+lib/
+include/
+.venv/
+
+# Secrets & Environment
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# AI Models & Large Files (Distribution via Docker Hub)
 inference-service/models/model.h5
+ml/model.h5
+*.h5
+*.keras
+*.tflite
+*.onnx
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+pip-delete-this-directory.txt
