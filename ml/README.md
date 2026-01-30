@@ -1,6 +1,6 @@
 # 🤖 Guide d'Entraînement Deep Learning
 
-Ce dossier contient l'expertise et les outils nécessaires pour préparer les données, entraîner le modèle de vision par ordinateur et valider ses performances.
+Ce dossier contient l'expertise et les outils nécessaires pour entraîner le modèle de vision par ordinateur et valider ses performances sur des mammographies numériques.
 
 ---
 
@@ -16,17 +16,24 @@ cd ml
 ```
 
 ### 2. Organisation des Données
-Structure requise pour le chargement dynamique des classes :
+Le système s'attend à ce que les données soient déjà réparties en trois sous-dossiers (`train`, `val`, `test`), chacun contenant les classes d'images :
 ```text
-ml/data/raw/
-├── Positive/  (Images de mammographies avec signes cliniques)
-└── Negative/  (Images de mammographies saines)
+ml/data/
+├── train/
+│   ├── Positive/
+│   └── Negative/
+├── val/
+│   ├── Positive/
+│   └── Negative/
+└── test/
+    ├── Positive/
+    └── Negative/
 ```
 
-### 3. Prétraitement & Nettoyage
-Normalisation des images (128x128), équilibrage des classes et suppression des artéfacts :
+### 3. Vérification de l'Intégrité
+Avant de lancer l'entraînement, vérifiez que vos données sont correctement structurées et lisibles par TensorFlow :
 ```bash
-python preprocessing.py clean --input data/raw --output data/cleaned
+python preprocessing.py check --data_dir data
 ```
 
 ### 4. Entraînement & Évaluation Automatisée
@@ -49,7 +56,7 @@ Nous utilisons une architecture **DenseNet-121** (Dense Convolutional Network) p
 Personnalisation sans modification du code source :
 - **Model** : Dimensions d'entrée (128x128x3).
 - **Training** : Batch size, Époques (Early Stopping activé).
-- **Paths** : Localisation des dossiers de données.
+- **Paths** : Localisation des dossiers `train`, `val`, et `test`.
 
 ---
 
@@ -69,18 +76,10 @@ Le système génère automatiquement `classes.json` pour garantir que les labels
 
 ## 📦 Gestion des Modèles & Déploiement
 
-Contrairement aux fichiers sources légers, le modèle `.h5` est volumineux. Le flux de travail privilégié est :
-1. **Validation** : Le script `train.py` vérifie la précision minimale requise.
-2. **Transfert** : Utilisation du script `./push_model.sh` pour synchroniser le modèle avec l'environnement de production.
-3. **Packaging** : Le modèle est intégré directement dans l'image Docker du service d'inférence pour garantir un fonctionnement "plug-and-play" sans dépendances externes.
-
----
-
-## 💡 Conseils de Recherche
-
-1. **Équilibrage** : Toujours utiliser le script `preprocessing.py` pour éviter le biais vers une classe spécifique (Data Balancing).
-2. **Régularisation** : Un Dropout de 0.5 est appliqué aux couches denses pour prévenir l'overfitting.
-3. **Augmentation** : L'augmentation de données en temps réel (rotations, flips) est intégrée par défaut dans les générateurs.
+Le modèle `.h5` est volumineux et géré via un pipeline Docker :
+1. **Validation** : Le script `train.py` vérifie la précision finale.
+2. **Transfert** : Utilisation de `./push_model.sh` pour synchroniser le modèle avec Docker Hub.
+3. **Packaging** : Le modèle est intégré dans l'image Docker du service d'inférence pour un déploiement sécurisé.
 
 ---
 
