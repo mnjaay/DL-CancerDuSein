@@ -1,93 +1,92 @@
 # 🤖 Guide d'Entraînement Deep Learning
 
-Ce dossier contient tous les outils nécessaires pour préparer les données, entraîner le modèle CNN et évaluer ses performances.
+Ce dossier contient l'expertise et les outils nécessaires pour préparer les données, entraîner le modèle de vision par ordinateur et valider ses performances.
 
 ---
 
-## 🚀 Démarrage Rapide
+## 🚀 Pipeline d'Entraînement
 
-### 1. Préparer l'Environnement
-Nous recommandons d'utiliser le script de setup à la racine du projet :
+### 1. Préparation de l'Environnement
+Il est fortement recommandé d'utiliser le script de configuration à la racine pour isoler les dépendances :
 ```bash
-cd ..
+# À la racine du projet
 ./setup_ml.sh
 source ml/venv/bin/activate
 cd ml
 ```
 
 ### 2. Organisation des Données
-Placez vos images brutes dans la structure suivante :
+Structure requise pour le chargement dynamique des classes :
 ```text
 ml/data/raw/
-├── Positive/  (Images avec cancer)
-└── Negative/  (Images saines)
+├── Positive/  (Images de mammographies avec signes cliniques)
+└── Negative/  (Images de mammographies saines)
 ```
 
-### 3. Nettoyer et Préparer (Preprocessing)
-Lancer le script de nettoyage pour normaliser les images (128x128) et équilibrer les classes :
+### 3. Prétraitement & Nettoyage
+Normalisation des images (128x128), équilibrage des classes et suppression des artéfacts :
 ```bash
 python preprocessing.py clean --input data/raw --output data/cleaned
 ```
 
-### 4. Entraîner le Modèle
+### 4. Entraînement & Évaluation Automatisée
+Le script déclenche l'apprentissage et une évaluation finale sur l'ensemble de test :
 ```bash
 python train.py --config config.yaml
 ```
-*Le modèle sera automatiquement sauvegardé dans `../inference-service/models/model.h5`.*
+*Le modèle est automatiquement validé et sauvegardé dans `../inference-service/models/model.h5`.*
 
 ---
 
-## ⚙️ Configuration (`config.yaml`)
+## ⚙️ Détails Techniques
 
-Vous pouvez personnaliser l'entraînement sans toucher au code :
-- **Data**: Chemins vers les dossiers `train`, `val`, `test`.
-- **Model**: Taille des images (par défaut 128x128), architecture.
-- **Training**: Batch size, nombre d'époques, taux d'apprentissage (learning rate).
-- **Callbacks**: Early stopping et réduction de LR sur plateau.
+### Architecture : DenseNet-121
+Nous utilisons une architecture **DenseNet-121** (Dense Convolutional Network) pour sa capacité supérieure en réutilisation de caractéristiques, cruciale pour détecter les motifs subtils des tissus mammaires.
+- **Fine-tuning** : Base pré-entraînée sur ImageNet avec déblocage progressif des couches.
+- **Optimisation** : Adam optimizer avec réduction dynamique du taux d'apprentissage.
+
+### Configuration (`config.yaml`)
+Personnalisation sans modification du code source :
+- **Model** : Dimensions d'entrée (128x128x3).
+- **Training** : Batch size, Époques (Early Stopping activé).
+- **Paths** : Localisation des dossiers de données.
 
 ---
 
-## 📊 Évaluation et Visualisation
+## 📊 Suivi des Performances
 
-### Rapports de Performance
-Après l'entraînement, générez un rapport complet :
-```bash
-python evaluate.py ../inference-service/models/model.h5 data/cleaned/test
-```
-Ce script génère :
-- Une **Matrice de Confusion**.
-- Les courbes **ROC** et **Precision-Recall**.
-- Un fichier `metrics.json` pour le suivi.
-
-### TensorBoard
-Pour suivre l'entraînement en temps réel :
+### Visualisation en Temps Réel
+Suivez l'évolution de la perte (loss) et de la précision (accuracy) :
 ```bash
 tensorboard --logdir logs/
 ```
-Puis ouvrez [http://localhost:6006](http://localhost:6006).
+Puis accédez à [http://localhost:6006](http://localhost:6006).
+
+### Inférence & Mapping
+Le système génère automatiquement `classes.json` pour garantir que les labels (Positive/Negative) sont correctement mappés entre l'entraînement et l'API d'inférence.
 
 ---
 
-## 🐘 Gestion des Modèles Lourds (Git LFS)
+## 📦 Gestion des Modèles & Déploiement
 
-Les fichiers `.h5` sont gérés par **Git LFS** pour ne pas alourdir le dépôt.
-1. Assurez-vous que LFS est installé (`brew install git-lfs`).
-2. Lors d'un `push`, le modèle est envoyé sur les serveurs de stockage d'objets de GitHub.
-3. Le workflow GitHub Actions détecte le changement et lance le déploiement.
+Contrairement aux fichiers sources légers, le modèle `.h5` est volumineux. Le flux de travail privilégié est :
+1. **Validation** : Le script `train.py` vérifie la précision minimale requise.
+2. **Transfert** : Utilisation du script `./push_model.sh` pour synchroniser le modèle avec l'environnement de production.
+3. **Packaging** : Le modèle est intégré directement dans l'image Docker du service d'inférence pour garantir un fonctionnement "plug-and-play" sans dépendances externes.
 
 ---
 
-## 💡 Conseils pour l'Entraînement
+## 💡 Conseils de Recherche
 
-1. **Équilibre des classes**: Le script `preprocessing.py` gère l'undersampling/oversampling. Utilisez-le pour éviter que le modèle ne favorise une classe.
-2. **Transfer Learning**: Si vos résultats stagnent, envisagez de modifier `train.py` pour utiliser une base **VGG16** ou **ResNet50** pré-entraînée sur ImageNet.
-3. **Dropout**: Une valeur de 0.5 est utilisée par défaut pour limiter l'overfitting sur les petits datasets.
+1. **Équilibrage** : Toujours utiliser le script `preprocessing.py` pour éviter le biais vers une classe spécifique (Data Balancing).
+2. **Régularisation** : Un Dropout de 0.5 est appliqué aux couches denses pour prévenir l'overfitting.
+3. **Augmentation** : L'augmentation de données en temps réel (rotations, flips) est intégrée par défaut dans les générateurs.
 
 ---
 
 <div align="center">
 
-**🔬 ML Research Unit - Cancer Detection System**
-© 2025 | Happy Training!
+**🔬 Unité de Recherche ML - Système de Détection du Cancer**
+© 2026 | Master 2 Informatique
 
 </div>
